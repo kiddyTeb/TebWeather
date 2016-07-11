@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Weather_Liangdekai</string>
+    <string name="dress">穿衣指数</string>
+    <string name="travel">旅游指数</string>
+    <string name="sport">晨练指数</string>
+    <string name="ray">紫外线强度</string>
+    <string name="suggestion">生活建议:</string>
+    <string name="future">未来六天天气:</string>
+    <string name="location">自动定位</string>
+    <string name="title">12306旅游小助手</string>
+    <string name="start">始发站:</string>
+    <string name="stop">终点站:</string>
+    <string name="find">查询</string>
+    <string name="buy">欢迎点击购票</string>
+</resources>

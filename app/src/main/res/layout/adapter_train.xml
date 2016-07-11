@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@mipmap/widget_bg"
+    >
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        >
+
+        <TextView
+            android:id="@+id/adapter_tv_trainopp"
+            android:layout_width="90dp"
+            android:layout_height="80dp"
+            android:textSize="24sp"
+            android:gravity="center"/>
+        <LinearLayout
+            android:layout_width="95dp"
+            android:layout_height="80dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/adapter_tv_startStation"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textSize="24sp"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/adapter_tv_startTime"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textSize="24sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/adapter_iv_row"
+            android:layout_width="75dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="30dp"
+            android:background="@mipmap/row"
+
+            />
+
+        <LinearLayout
+            android:layout_width="95dp"
+            android:layout_height="80dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/adapter_tv_stopStation"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textSize="24sp"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/adapter_tv_stopTime"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textSize="24sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="@string/buy"
+        android:textSize="22sp"
+        android:gravity="center"/>
+
+</LinearLayout>
