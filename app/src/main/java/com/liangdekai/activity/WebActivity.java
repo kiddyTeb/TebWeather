@@ -2,6 +2,7 @@ package com.liangdekai.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
@@ -15,6 +16,7 @@ public class WebActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏标题栏
         setContentView(R.layout.activity_web);
         webView = (WebView) findViewById(R.id.web_wv_web);//获取WebView实例
         webView.getSettings().setJavaScriptEnabled(true);//让WebView支持JavaScript脚本

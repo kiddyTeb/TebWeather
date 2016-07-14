@@ -28,6 +28,7 @@
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:screenOrientation="landscape"
         android:theme="@style/AppTheme">
         <activity
             android:name="com.liangdekai.activity.ChooseActivity"
