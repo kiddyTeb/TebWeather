@@ -1,6 +1,14 @@
 package com.liangdekai.util;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -11,10 +19,7 @@ import java.net.URL;
  */
 public class HttpUtil {
 
-    public static void sendHttpResquest(final String address ,final HttpCallbackListener listener){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        public static void sendByConnection(final String address , final HttpCallbackListener listener){
                 HttpURLConnection connection = null;
                 try{
                     URL url = new URL(address);
@@ -42,7 +47,27 @@ public class HttpUtil {
                         connection.disconnect();
                     }
                 }
-            }
-        }).start();
-    }
+
+        }
+
+        public static void sendByClient (final String address , final HttpCallbackListener listener){
+                try{
+                    String result = null;
+                    HttpClient httpClient = new DefaultHttpClient();//获取实例
+                    HttpGet httpGet = new HttpGet(address);//创建HttpGet对象，传入网络地址
+                    HttpResponse httpResponse = null;//IOException
+                    httpResponse = httpClient.execute(httpGet);
+                    if (httpResponse.getStatusLine().getStatusCode() == 200){
+                        HttpEntity httpEntity = httpResponse.getEntity();//获取HttpEntity实例
+                        result = EntityUtils.toString(httpEntity,"utf-8");//转换为字符串
+                    }
+                    if(listener!=null)
+                        listener.onFinish(result.toString());
+                }catch (IOException e){
+                    e.printStackTrace();
+                    if(listener != null){
+                        listener.onError(e);
+                    }
+                }
+        }
 }

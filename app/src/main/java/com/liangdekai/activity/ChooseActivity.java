@@ -3,7 +3,6 @@ package com.liangdekai.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,15 +29,6 @@ import com.liangdekai.weather_liangdekai.R;
 import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -236,7 +226,7 @@ public class ChooseActivity extends Activity {
             @Override
             public void run() {
                 String address = "http://v.juhe.cn/weather/citys?key=e56938624d0f9e670b989c945ede8aad";
-                HttpUtil.sendHttpResquest(address, new HttpCallbackListener() {
+                HttpUtil.sendByConnection(address, new HttpCallbackListener() {
                     @Override
                     public void onFinish(String result) {
                         if (result != null){

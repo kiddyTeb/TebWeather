@@ -8,26 +8,20 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.liangdekai.activity.WeatherActivity;
 import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
+import com.liangdekai.util.HttpCallbackListener;
+import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
 import com.liangdekai.weather_liangdekai.R;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -88,13 +82,14 @@ public class UpdateService extends Service{
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
             String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=&key=e56938624d0f9e670b989c945ede8aad";
-            new MyAsyncTask().execute(address);//启动更新任务
+            //new MyAsyncTask().execute(address);//启动更新任务
+            resquestThread(address);
         } catch (UnsupportedEncodingException e) {//不支持编码异常，说明字符编码有问题
             e.printStackTrace();
         }
     }
 
-    class MyAsyncTask extends AsyncTask<String, Void, String> {
+    /*class MyAsyncTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... address) {
@@ -121,5 +116,28 @@ public class UpdateService extends Service{
                 HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(), weatherDbOpenHelper, result);//处理结果
             }
         }
+    }*/
+
+    private void resquestThread(final String address){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpUtil.sendByConnection(address, new HttpCallbackListener() {
+                    @Override
+                    public void onFinish(String result) {
+                        if (result != null) {
+                            WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(MyApplication.getContext());
+                            HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(), weatherDbOpenHelper, result);//处理结果
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Toast.makeText(UpdateService.this,"fail updaye!",Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        }).start();
     }
+
 }

@@ -3,8 +3,9 @@ package com.liangdekai.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
@@ -17,19 +18,13 @@ import android.widget.Toast;
 import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.bean.FutureWeatherBean;
 import com.liangdekai.service.UpdateService;
+import com.liangdekai.util.HttpCallbackListener;
+import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
 import com.liangdekai.weather_liangdekai.R;
 import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -38,6 +33,8 @@ import java.util.List;
  * 显示天气信息
  */
 public class WeatherActivity extends Activity implements View.OnClickListener {
+    public static final int SUCCESS_IN = 0;
+    public static final int FAIL_OUT =1;
     private TextView mTvCity;
     private TextView mTvPublishTime;
     private TextView mTvDate;
@@ -88,6 +85,22 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private List<FutureWeatherBean> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
     private ProgressFragment mProgressFragment = new ProgressFragment();
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case SUCCESS_IN :
+                    mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
+                    mProgressFragment.dismiss();
+                    showWeather();
+                    break;
+                case FAIL_OUT :
+                    mProgressFragment.dismiss();
+                    Toast.makeText(WeatherActivity.this, "some error!", Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+    };
 
 
     @Override
@@ -248,7 +261,9 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      */
     private void sendResquest(String cityId){
         String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=e56938624d0f9e670b989c945ede8aad";
-        new MyAsyncTask().execute(address);//执行查询天气任务
+        //new MyAsyncTask().execute(address);//执行查询天气任务
+        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        resquestThread(address);
     }
 
     /**
@@ -258,7 +273,9 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      */
     private void findWeatherByGps(String latitude , String longtitude){
         String address = "http://v.juhe.cn/weather/geo?format=1&key=e56938624d0f9e670b989c945ede8aad&lon="+longtitude+"&lat="+latitude;
-        new MyAsyncTask().execute(address);//执行查询天气任务
+        //new MyAsyncTask().execute(address);//执行查询天气任务
+        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        resquestThread(address);
     }
 
     /**
@@ -326,7 +343,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    class MyAsyncTask extends AsyncTask<String, Void, String> {
+    /*class MyAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
             mProgressFragment.show(getFragmentManager(), "progressDialog");
@@ -337,7 +354,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
          * @param address
          * @return
          */
-        @Override
+        /*@Override
         protected String doInBackground(String... address) {
             String result ;
             try {
@@ -360,7 +377,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
          * 对返回的结果进行处理收尾工作
          * @param result
          */
-        @Override
+        /*@Override
         protected void onPostExecute(String result) {
             if (result != null){
                 boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),mWeatherDbOpenHelper,result);//处理返回数据
@@ -374,5 +391,34 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 Toast.makeText(WeatherActivity.this, "failed!please check your internet or cityName", Toast.LENGTH_LONG).show();
             }
         }
+    }*/
+
+    /**
+     *开启一个线程执行网络请求
+     */
+    private void resquestThread(final String address){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpUtil.sendByClient(address, new HttpCallbackListener() {
+                    @Override
+                    public void onFinish(String result) {
+                        if (result != null){
+                            boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),mWeatherDbOpenHelper,result);//处理返回数据
+                            if (flag){
+                                mHandler.obtainMessage(SUCCESS_IN).sendToTarget();
+                            }
+                        }else{
+                            mHandler.obtainMessage(FAIL_OUT).sendToTarget();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        mHandler.obtainMessage(FAIL_OUT).sendToTarget();
+                    }
+                });
+            }
+        }).start();
     }
 }
