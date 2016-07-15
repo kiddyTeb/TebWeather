@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,6 +23,8 @@ import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.bean.CityBean;
 import com.liangdekai.bean.ProvinceBean;
+import com.liangdekai.util.HttpCallbackListener;
+import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.LocationUtil;
 import com.liangdekai.weather_liangdekai.R;
 import com.liangdekai.db.WeatherDbOpenHelper;
@@ -34,6 +38,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -43,6 +48,8 @@ import java.util.List;
  * 选择需要查询的天气的城市
  */
 public class ChooseActivity extends Activity {
+    public static final int SUCCESS_IN = 0;
+    public static final int FAIL_OUT =1;
     private CityAdapter mCityAdapter;
     private List<String> mList = new ArrayList<String>();
     private List<ProvinceBean> mProvinceBeanList = new ArrayList<ProvinceBean>();
@@ -56,6 +63,21 @@ public class ChooseActivity extends Activity {
     private String mSelectedProvinceName;
     private boolean mFromWeatherActivity;
     private ProgressFragment mProgressFragment = new ProgressFragment();
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case SUCCESS_IN :
+                    mProgressFragment.dismiss();//取消进度条
+                    searchProvince();//查询省份
+                    break;
+                case FAIL_OUT :
+                    mProgressFragment.dismiss();//取消进度条
+                    Toast.makeText(ChooseActivity.this, "some error", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +130,13 @@ public class ChooseActivity extends Activity {
                         if (mCityBeanList.size() == 0){//若容器为空，则加载数据库中的数据
                             mCityBeanList = mWeatherDbOpenHelper.loadAllCity();
                         }
+
+                        for (int i= 0 ; i < mProvinceBeanList.size(); i++){
+                            if (s.equals(mProvinceBeanList.get(i).getProvinceName())){
+                                searchCity(s);
+                            }
+                        }
+
                         for (int i = 0; i < mCityBeanList.size(); i++) {
                             if (s.equals(mCityBeanList.get(i).getCityName())){
                                 String cityNameUTF = URLEncoder.encode(s,"UTF-8");//将城市的名字转换为utf8 URLENCLODE格式
@@ -136,6 +165,7 @@ public class ChooseActivity extends Activity {
                 return false;
             }
         });
+
         mBtLocation.setOnClickListener(new View.OnClickListener() {//设置按钮的事件监听
             @Override
             public void onClick(View view) {
@@ -199,8 +229,34 @@ public class ChooseActivity extends Activity {
      * 发送请求，处理返回结果
      */
     private void searchByInternet() {
-        String address = "http://v.juhe.cn/weather/citys?key=e56938624d0f9e670b989c945ede8aad";
-        new MyAsyncTask().execute(address);//执行查询城市的任务
+        //String address = "http://v.juhe.cn/weather/citys?key=e56938624d0f9e670b989c945ede8aad";
+        //new MyAsyncTask().execute(address);//执行查询城市的任务
+        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String address = "http://v.juhe.cn/weather/citys?key=e56938624d0f9e670b989c945ede8aad";
+                HttpUtil.sendHttpResquest(address, new HttpCallbackListener() {
+                    @Override
+                    public void onFinish(String result) {
+                        if (result != null){
+                            boolean flag = false;
+                            flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
+                            if (flag){
+                                mHandler.obtainMessage(SUCCESS_IN).sendToTarget();
+                            }
+                        }else{
+                            mHandler.obtainMessage(FAIL_OUT).sendToTarget();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        mHandler.obtainMessage(FAIL_OUT).sendToTarget();
+                    }
+                });
+            }
+        }).start();
     }
 
 
@@ -223,7 +279,7 @@ public class ChooseActivity extends Activity {
     }
 
 
-    class MyAsyncTask extends AsyncTask<String, Void, String> {
+    /*class MyAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
             mProgressFragment.show(getFragmentManager(), "progressDialog");
@@ -234,7 +290,7 @@ public class ChooseActivity extends Activity {
          * @param address
          * @return result
          */
-        @Override
+       /* @Override
         protected String doInBackground(String... address) {
             String result ;
             try {
@@ -256,7 +312,7 @@ public class ChooseActivity extends Activity {
          * 对返回的结果进行处理收尾工作
          * @param result
          */
-        @Override
+        /*@Override
         protected void onPostExecute(String result) {
             if (result != null){
                 boolean flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
@@ -269,6 +325,6 @@ public class ChooseActivity extends Activity {
                 Toast.makeText(ChooseActivity.this, "failed to load,please check your internet", Toast.LENGTH_LONG).show();
             }
         }
-    }
+    }*/
 }
 
