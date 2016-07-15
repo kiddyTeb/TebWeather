@@ -22,6 +22,7 @@ import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.bean.CityBean;
 import com.liangdekai.bean.ProvinceBean;
+import com.liangdekai.util.HasNetUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.LocationUtil;
@@ -63,7 +64,7 @@ public class ChooseActivity extends Activity {
                     break;
                 case FAIL_OUT :
                     mProgressFragment.dismiss();//取消进度条
-                    Toast.makeText(ChooseActivity.this, "some error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChooseActivity.this, "网络请求失败...", Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -195,7 +196,13 @@ public class ChooseActivity extends Activity {
             mLvShowCity.setSelection(0);//将数据定位到第一行
             mLevel = "province";//设置当前状态为省份查询
         } else {//则发送请求获取
-            searchByInternet();
+            if (HasNetUtil.hasNetWork()){
+                searchByInternet();
+            }
+            else{
+                Toast.makeText(ChooseActivity.this ,"请检查网络是否开启" ,Toast.LENGTH_SHORT).show() ;
+                finish();
+            }
         }
     }
 

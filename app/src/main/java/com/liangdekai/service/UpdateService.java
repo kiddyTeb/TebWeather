@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.liangdekai.activity.WeatherActivity;
@@ -59,7 +60,7 @@ public class UpdateService extends Service{
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setContentTitle(preferences.getString("city","暂无"))
                 .setContentText(preferences.getString("weather","暂无")+"\t"+preferences.getString("temperature",""))
-                .setSmallIcon(R.mipmap.clouds)
+                .setSmallIcon(R.mipmap.icon)
                 .setTicker("天气已经更新，注意天气变化")
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setContentIntent(pendingIntend);
@@ -133,7 +134,7 @@ public class UpdateService extends Service{
 
                     @Override
                     public void onError(Exception e) {
-                        Toast.makeText(UpdateService.this,"fail updaye!",Toast.LENGTH_SHORT).show();
+                        Log.d("test", "error");
                     }
                 });
             }

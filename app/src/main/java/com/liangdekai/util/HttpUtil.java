@@ -20,15 +20,17 @@ import java.net.URL;
 public class HttpUtil {
 
         public static void sendByConnection(final String address , final HttpCallbackListener listener){
-                HttpURLConnection connection = null;
+                HttpURLConnection connection = null ;
+                InputStream inputStream = null ;
+                BufferedReader bufferedReader = null ;
                 try{
                     URL url = new URL(address);
                     connection = (HttpURLConnection) url.openConnection();//获取HttpURLConnection实例
                     connection.setRequestMethod("GET");//设置从服务器中获取数据
                     connection.setConnectTimeout(10000);//设置连接超时未10S
                     connection.setReadTimeout(10000);//设置读取超时未10S
-                    InputStream inputStream = connection.getInputStream();//获取到服务器返回的输入流
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    inputStream = connection.getInputStream();//获取到服务器返回的输入流
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                     StringBuilder result = new StringBuilder();//对输入流进行读取
                     String line;
                     while((line = bufferedReader.readLine())!=null){
@@ -43,6 +45,17 @@ public class HttpUtil {
                     }
                 }
                 finally {
+                    try{
+                        if (inputStream != null){
+                            inputStream.close();
+                        }
+                        if (bufferedReader != null){
+                            bufferedReader.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     if(connection!=null){
                         connection.disconnect();
                     }

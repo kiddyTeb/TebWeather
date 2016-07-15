@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.bean.FutureWeatherBean;
 import com.liangdekai.service.UpdateService;
+import com.liangdekai.util.HasNetUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
@@ -84,18 +85,19 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private View mTravelView;
     private List<FutureWeatherBean> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
-    private ProgressFragment mProgressFragment = new ProgressFragment();
+    //private ProgressFragment mProgressFragment = new ProgressFragment();
+    private ProgressFragment mProgressFragment ;
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case SUCCESS_IN :
                     mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
-                    mProgressFragment.dismiss();
+                    closeDialog();
                     showWeather();
                     break;
                 case FAIL_OUT :
-                    mProgressFragment.dismiss();
+                    closeDialog();
                     Toast.makeText(WeatherActivity.this, "some error!", Toast.LENGTH_LONG).show();
                     break;
             }
@@ -121,9 +123,13 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
             if (isFromChooseActivity) {//如果是，则直接加载数据库中的内容
                 mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();
                 showWeather();//展现天气
-            } else {
+            }else if (HasNetUtil.hasNetWork()){
                 String cityId = getIntent().getStringExtra("cityId");//获取选择的城市ID
                 sendResquest(cityId);//否则通过城市ID发送请求
+            } else {
+                Toast.makeText(WeatherActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
+                mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();
+                showWeather();//展现天气
             }
         }
     }
@@ -139,7 +145,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
             case R.id.weather_bt_refresh://点击更新按钮
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中获取城市名称
                 try {
-                    sendResquest(URLEncoder.encode(preferences.getString("city",""),"UTF-8"));//从文件获取城市名字并转换格式，重新发送请求
+                    if (HasNetUtil.hasNetWork()){
+                        sendResquest(URLEncoder.encode(preferences.getString("city",""),"UTF-8"));//从文件获取城市名字并转换格式，重新发送请求
+                    }else {
+                        Toast.makeText(WeatherActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
+                    }
                 } catch (UnsupportedEncodingException e) {//不支持编码异常，说明字符编码有问题
                     e.printStackTrace();
                 }
@@ -262,7 +272,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private void sendResquest(String cityId){
         String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=e56938624d0f9e670b989c945ede8aad";
         //new MyAsyncTask().execute(address);//执行查询天气任务
-        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        showDialog();
         resquestThread(address);
     }
 
@@ -274,7 +284,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private void findWeatherByGps(String latitude , String longtitude){
         String address = "http://v.juhe.cn/weather/geo?format=1&key=e56938624d0f9e670b989c945ede8aad&lon="+longtitude+"&lat="+latitude;
         //new MyAsyncTask().execute(address);//执行查询天气任务
-        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        showDialog();
         resquestThread(address);
     }
 
@@ -421,4 +431,16 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
             }
         }).start();
     }
+
+    private void showDialog(){
+        mProgressFragment = new ProgressFragment();
+        mProgressFragment.show(getFragmentManager(), "progressDialog");
+    }
+
+    private void closeDialog(){
+        if (mProgressFragment != null){
+            mProgressFragment.dismiss();
+        }
+    }
+
 }
