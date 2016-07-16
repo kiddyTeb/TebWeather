@@ -22,7 +22,6 @@ import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.bean.CityBean;
 import com.liangdekai.bean.ProvinceBean;
-import com.liangdekai.util.ActivityCollectUtil;
 import com.liangdekai.util.HasNetUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
@@ -101,12 +100,14 @@ public class ChooseActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mLevel.equals("province")) {
+                    Log.d("test","ss");
                     mSelectedProvinceName = mProvinceBeanList.get(position).getProvinceName();//若点击相应省份，则显示相应城市
                     searchCity(mSelectedProvinceName);
                 } else if (mLevel.equals("city")) {
-                    Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
+                    //Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
+                    Intent intent = new Intent() ;
                     intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
-                    startActivity(intent);
+                    setResult(RESULT_OK , intent);
                     finish();//关闭当前活动
                 }
             }
@@ -181,7 +182,6 @@ public class ChooseActivity extends Activity {
             }
         });
         searchProvince();//查询省份
-        ActivityCollectUtil.addActivity(this);
     }
 
     /**
@@ -263,7 +263,6 @@ public class ChooseActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ActivityCollectUtil.remoteActivity(this);
     }
 
     /**

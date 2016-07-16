@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -18,7 +19,6 @@ import android.widget.Toast;
 import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.bean.FutureWeatherBean;
 import com.liangdekai.service.UpdateService;
-import com.liangdekai.util.ActivityCollectUtil;
 import com.liangdekai.util.HasNetUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
@@ -133,16 +133,27 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 showWeather();//展现天气
             }
         }
-        ActivityCollectUtil.addActivity(this);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("test","ss");
+        switch (requestCode){
+            case 1 :
+                if (resultCode == RESULT_OK){
+                    String cityId = data.getStringExtra("cityId");
+                    sendResquest(cityId);
+                }
+        }
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.weather_bt_switch://点击切换城市
                 Intent intent = new Intent(WeatherActivity.this,ChooseActivity.class);
                 intent.putExtra("fromWeatherActivity",true);//设置是否从天气展示界面跳转而回的标志
-                startActivity(intent);
-                finish();
+                startActivityForResult(intent ,1);
                 break;
             case R.id.weather_bt_refresh://点击更新按钮
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中获取城市名称
@@ -215,10 +226,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         mTravelView = findViewById(R.id.weather_ll_travel);
     }
 
-    @Override
-    public void onBackPressed() {
-        ActivityCollectUtil.finishAll();
-    }
 
     /**
      * 展示天气信息
@@ -439,11 +446,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         }).start();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        ActivityCollectUtil.remoteActivity(this);
-    }
 
     private void showDialog(){
         mProgressFragment = new ProgressFragment();
