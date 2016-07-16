@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.bean.FutureWeatherBean;
 import com.liangdekai.service.UpdateService;
+import com.liangdekai.util.ActivityCollectUtil;
 import com.liangdekai.util.HasNetUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
@@ -132,6 +133,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 showWeather();//展现天气
             }
         }
+        ActivityCollectUtil.addActivity(this);
     }
     @Override
     public void onClick(View v) {
@@ -211,6 +213,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         mTvFutureWindSix = (TextView) findViewById(R.id.weather_tv_futureWindSix);
         mLlBackground = (LinearLayout) findViewById(R.id.weather_ll_background);
         mTravelView = findViewById(R.id.weather_ll_travel);
+    }
+
+    @Override
+    public void onBackPressed() {
+        ActivityCollectUtil.finishAll();
     }
 
     /**
@@ -430,6 +437,12 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 });
             }
         }).start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollectUtil.remoteActivity(this);
     }
 
     private void showDialog(){

@@ -22,6 +22,7 @@ import com.liangdekai.Fragment.ProgressFragment;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.bean.CityBean;
 import com.liangdekai.bean.ProvinceBean;
+import com.liangdekai.util.ActivityCollectUtil;
 import com.liangdekai.util.HasNetUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
@@ -150,7 +151,7 @@ public class ChooseActivity extends Activity {
             @Override
             public boolean onQueryTextChange(String s) {
                 if (TextUtils.isEmpty(s)){
-                    mLvShowCity.clearTextFilter();//清楚ListView的过滤
+                    mLvShowCity.clearTextFilter();//清除ListView的过滤
                 }else{
                     mLvShowCity.setFilterText(s);//使用用户输入的内容进行过滤
                 }
@@ -180,6 +181,7 @@ public class ChooseActivity extends Activity {
             }
         });
         searchProvince();//查询省份
+        ActivityCollectUtil.addActivity(this);
     }
 
     /**
@@ -257,6 +259,12 @@ public class ChooseActivity extends Activity {
         }).start();
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollectUtil.remoteActivity(this);
+    }
 
     /**
      * 重写BACK键方法
