@@ -125,6 +125,7 @@ public class ChooseActivity extends Activity {
                         for (int i= 0 ; i < mProvinceBeanList.size(); i++){
                             if (s.equals(mProvinceBeanList.get(i).getProvinceName())){
                                 searchCity(s);
+                                return true;
                             }
                         }
 
