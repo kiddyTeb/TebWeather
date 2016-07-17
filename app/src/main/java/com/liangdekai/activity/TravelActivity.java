@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.liangdekai.Fragment.ProgressFragment;
+import com.liangdekai.Fragment.ProgressDialogFragment;
 import com.liangdekai.adapter.TrainAdapter;
 import com.liangdekai.bean.CityBean;
 import com.liangdekai.bean.TrainBean;
@@ -35,7 +35,7 @@ import java.util.List;
 
 public class TravelActivity extends Activity implements View.OnClickListener {
     private List<TrainBean> mTrainList = new ArrayList<TrainBean>();
-    private ProgressFragment mProgressFragment = new ProgressFragment();
+    private ProgressDialogFragment mProgressDialogFragment = new ProgressDialogFragment();
     private List<CityBean> mCityList = new ArrayList<CityBean>();
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
     private EditText mEtStart;
@@ -81,7 +81,7 @@ public class TravelActivity extends Activity implements View.OnClickListener {
      * 查询无效提示
      */
     private void error(){
-        mProgressFragment.dismiss();
+        mProgressDialogFragment.dismiss();
         Toast.makeText(this,"两站之间的班次尚未开通或者当日无线路开通",Toast.LENGTH_LONG).show();
     }
 
@@ -143,7 +143,7 @@ public class TravelActivity extends Activity implements View.OnClickListener {
 
         @Override
         protected void onPreExecute() {
-            mProgressFragment.show(getFragmentManager(), "progressDialog");
+            mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
         }
 
         @Override
@@ -169,7 +169,7 @@ public class TravelActivity extends Activity implements View.OnClickListener {
             if (result != null) {
                 mTrainList = HandleResponseUtil.handleTrainResponse(result);//若不为空，处理结果
                 loadData();//加载数据
-                mProgressFragment.dismiss();
+                mProgressDialogFragment.dismiss();
             }else {
                 error();//查询无效提示
             }

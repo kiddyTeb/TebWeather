@@ -3,7 +3,7 @@ package com.liangdekai.util;
 /**
  * 计算下一天日期
  */
-public class NextDayUtil {
+public class DateUtil {
 
     public static String calculateNextDay(String date){
         int year = Integer.valueOf(date.substring(0,4));

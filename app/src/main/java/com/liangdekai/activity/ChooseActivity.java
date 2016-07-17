@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -18,11 +17,11 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liangdekai.Fragment.ProgressFragment;
+import com.liangdekai.Fragment.ProgressDialogFragment;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.bean.CityBean;
 import com.liangdekai.bean.ProvinceBean;
-import com.liangdekai.util.HasNetUtil;
+import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.LocationUtil;
@@ -51,19 +50,20 @@ public class ChooseActivity extends Activity {
     private Button mBtLocation;
     private SearchView mSvSearch;
     private String mLevel;
+    private String mSelected;
     private String mSelectedProvinceName;
     private boolean mFromWeatherActivity;
-    private ProgressFragment mProgressFragment = new ProgressFragment();
+    private ProgressDialogFragment mProgressDialogFragment = new ProgressDialogFragment();
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case SUCCESS_IN :
-                    mProgressFragment.dismiss();//取消进度条
+                    mProgressDialogFragment.dismiss();//取消进度条
                     searchProvince();//查询省份
                     break;
                 case FAIL_OUT :
-                    mProgressFragment.dismiss();//取消进度条
+                    mProgressDialogFragment.dismiss();//取消进度条
                     Toast.makeText(ChooseActivity.this, "网络请求失败...", Toast.LENGTH_SHORT).show();
                     break;
             }
@@ -73,10 +73,11 @@ public class ChooseActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中查询是否已经存在已选择的城市天气信息
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中查询是否已经存在已选择的城市天气信息
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE);
         mFromWeatherActivity = getIntent().getBooleanExtra("fromWeatherActivity",false);//判断是否从展示天气界面处跳转而来
-        String selected = preferences.getString("city","");//获取文件中的城市名称，若没有，视为首次进行选择操作
-        if(!mFromWeatherActivity && !selected.equals("")){//不从天气展示页面处跳转而来并且也有选择城市，则直接跳转到天气展示界面
+        mSelected = preferences.getString("city","");//获取文件中的城市名称，若没有，视为首次进行选择操作
+        if(!mFromWeatherActivity && !mSelected.equals("")){//不从天气展示页面处跳转而来并且也有选择城市，则直接跳转到天气展示界面
             Intent intent = new Intent(ChooseActivity.this,WeatherActivity.class);
             intent.putExtra("backFromChooseActivity",true);//设置非第一次操作的标识
             startActivity(intent);
@@ -104,11 +105,17 @@ public class ChooseActivity extends Activity {
                     mSelectedProvinceName = mProvinceBeanList.get(position).getProvinceName();//若点击相应省份，则显示相应城市
                     searchCity(mSelectedProvinceName);
                 } else if (mLevel.equals("city")) {
-                    //Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
-                    Intent intent = new Intent() ;
-                    intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
-                    setResult(RESULT_OK , intent);
-                    finish();//关闭当前活动
+                    if (mSelected.equals("")){
+                        Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
+                        intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
+                        startActivity(intent);
+                        finish();//关闭当前活动
+                    }else{
+                        Intent intent = new Intent() ;
+                        intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
+                        setResult(RESULT_OK , intent);
+                        finish();//关闭当前活动
+                    }
                 }
             }
         });
@@ -199,7 +206,7 @@ public class ChooseActivity extends Activity {
             mLvShowCity.setSelection(0);//将数据定位到第一行
             mLevel = "province";//设置当前状态为省份查询
         } else {//则发送请求获取
-            if (HasNetUtil.hasNetWork()){
+            if (NetWorkUtil.hasNetWork()){
                 searchByInternet();
             }
             else{
@@ -231,11 +238,11 @@ public class ChooseActivity extends Activity {
     private void searchByInternet() {
         //String address = "http://v.juhe.cn/weather/citys?key=e56938624d0f9e670b989c945ede8aad";
         //new MyAsyncTask().execute(address);//执行查询城市的任务
-        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String address = "http://v.juhe.cn/weather/citys?key=e56938624d0f9e670b989c945ede8aad";
+                String address = "http://v.juhe.cn/weather/citys?key=5b34e560321fd5f86680b4deb1e30ad8";
                 HttpUtil.sendByConnection(address, new HttpCallbackListener() {
                     @Override
                     public void onFinish(String result) {
@@ -287,7 +294,7 @@ public class ChooseActivity extends Activity {
     /*class MyAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
-            mProgressFragment.show(getFragmentManager(), "progressDialog");
+            mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
         }
 
         /**
@@ -321,12 +328,12 @@ public class ChooseActivity extends Activity {
         protected void onPostExecute(String result) {
             if (result != null){
                 boolean flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
-                mProgressFragment.dismiss();//取消进度条
+                mProgressDialogFragment.dismiss();//取消进度条
                 if (flag){
                     searchProvince();//查询省份
                 }
             }else{
-                mProgressFragment.dismiss();//取消进度条
+                mProgressDialogFragment.dismiss();//取消进度条
                 Toast.makeText(ChooseActivity.this, "failed to load,please check your internet", Toast.LENGTH_LONG).show();
             }
         }

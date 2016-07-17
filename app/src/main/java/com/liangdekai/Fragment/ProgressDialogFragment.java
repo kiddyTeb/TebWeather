@@ -12,7 +12,7 @@ import com.liangdekai.weather_liangdekai.R;
 /**
  * 用DialogFragment 创建自定义对话框
  */
-public class ProgressFragment extends DialogFragment{
+public class ProgressDialogFragment extends android.app.DialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

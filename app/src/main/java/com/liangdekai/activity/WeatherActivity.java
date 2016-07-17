@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -16,10 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liangdekai.Fragment.ProgressFragment;
+import com.liangdekai.Fragment.ProgressDialogFragment;
 import com.liangdekai.bean.FutureWeatherBean;
 import com.liangdekai.service.UpdateService;
-import com.liangdekai.util.HasNetUtil;
+import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
@@ -86,8 +85,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private View mTravelView;
     private List<FutureWeatherBean> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
-    //private ProgressFragment mProgressFragment = new ProgressFragment();
-    private ProgressFragment mProgressFragment ;
+    //private ProgressDialogFragment mProgressDialogFragment = new ProgressDialogFragment();
+    private ProgressDialogFragment mProgressDialogFragment;
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -124,7 +123,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
             if (isFromChooseActivity) {//如果是，则直接加载数据库中的内容
                 mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();
                 showWeather();//展现天气
-            }else if (HasNetUtil.hasNetWork()){
+            }else if (NetWorkUtil.hasNetWork()){
                 String cityId = getIntent().getStringExtra("cityId");//获取选择的城市ID
                 sendResquest(cityId);//否则通过城市ID发送请求
             } else {
@@ -156,9 +155,10 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 startActivityForResult(intent ,1);
                 break;
             case R.id.weather_bt_refresh://点击更新按钮
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中获取城市名称
+                //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中获取城市名称
+                SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
                 try {
-                    if (HasNetUtil.hasNetWork()){
+                    if (NetWorkUtil.hasNetWork()){
                         sendResquest(URLEncoder.encode(preferences.getString("city",""),"UTF-8"));//从文件获取城市名字并转换格式，重新发送请求
                     }else {
                         Toast.makeText(WeatherActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
@@ -231,7 +231,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * 展示天气信息
      */
     public void showWeather(){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
         mTvCity.setText(preferences.getString("city",""));//对各种组件进行设置值
         changeBackground(mLlBackground,preferences.getString("weather",""));
         mTvPublishTime.setText(preferences.getString("time",""));
@@ -284,7 +285,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * @param cityId
      */
     private void sendResquest(String cityId){
-        String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=e56938624d0f9e670b989c945ede8aad";
+        String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
         //new MyAsyncTask().execute(address);//执行查询天气任务
         showDialog();
         resquestThread(address);
@@ -296,7 +297,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * @param longtitude
      */
     private void findWeatherByGps(String latitude , String longtitude){
-        String address = "http://v.juhe.cn/weather/geo?format=1&key=e56938624d0f9e670b989c945ede8aad&lon="+longtitude+"&lat="+latitude;
+        String address = "http://v.juhe.cn/weather/geo?format=1&key=5b34e560321fd5f86680b4deb1e30ad8&lon="+longtitude+"&lat="+latitude;
         //new MyAsyncTask().execute(address);//执行查询天气任务
         showDialog();
         resquestThread(address);
@@ -370,7 +371,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     /*class MyAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
-            mProgressFragment.show(getFragmentManager(), "progressDialog");
+            mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
         }
 
         /**
@@ -407,11 +408,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),mWeatherDbOpenHelper,result);//处理返回数据
                 if (flag){
                     mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
-                    mProgressFragment.dismiss();
+                    mProgressDialogFragment.dismiss();
                     showWeather();
                 }
             }else{
-                mProgressFragment.dismiss();
+                mProgressDialogFragment.dismiss();
                 Toast.makeText(WeatherActivity.this, "failed!please check your internet or cityName", Toast.LENGTH_LONG).show();
             }
         }
@@ -448,13 +449,13 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
 
 
     private void showDialog(){
-        mProgressFragment = new ProgressFragment();
-        mProgressFragment.show(getFragmentManager(), "progressDialog");
+        mProgressDialogFragment = new ProgressDialogFragment();
+        mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
     }
 
     private void closeDialog(){
-        if (mProgressFragment != null){
-            mProgressFragment.dismiss();
+        if (mProgressDialogFragment != null){
+            mProgressDialogFragment.dismiss();
         }
     }
 

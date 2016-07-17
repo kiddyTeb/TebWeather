@@ -10,10 +10,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.liangdekai.activity.WeatherActivity;
 import com.liangdekai.db.WeatherDbOpenHelper;
@@ -45,7 +43,8 @@ public class UpdateService extends Service{
             }
         }).start();
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
         Intent notificationIntent = new Intent(this, WeatherActivity.class);
         notificationIntent.putExtra("backFromChooseActivity",true);//设置标识
         PendingIntent pendingIntend = PendingIntent.getActivity(this,0,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);//实现点击效果
@@ -71,11 +70,12 @@ public class UpdateService extends Service{
     }
 
     public void updateWeather(){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
         String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
-            String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=&key=e56938624d0f9e670b989c945ede8aad";
+            String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
             //new MyAsyncTask().execute(address);//启动更新任务
             resquestThread(address);
         } catch (UnsupportedEncodingException e) {//不支持编码异常，说明字符编码有问题

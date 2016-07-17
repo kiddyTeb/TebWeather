@@ -95,7 +95,7 @@ public class HandleResponseUtil {
                 String month = nowDate.substring(yearIndex+1,monthIndex);
                 String day = nowDate.substring(monthIndex+1,dayIndex);
                 String date = year+month+day;//将当日日期数字化
-                date = NextDayUtil.calculateNextDay(date);//计算下一天的日期
+                date = DateUtil.calculateNextDay(date);//计算下一天的日期
                 JSONObject futrueMessage = new JSONObject(future);
                 for(int i = 0 ; i<6 ;i++){
                     String information = futrueMessage.getString("day_"+date);
@@ -104,7 +104,7 @@ public class HandleResponseUtil {
                     JSONObject weatherId = new JSONObject(category);
                     weatherList.add(new FutureWeatherBean(weather.getString("week"),weather.getString("weather"),//将对象封装到容器中
                             weather.getString("temperature"),weather.getString("wind"),weatherId.getString("fa")));
-                    date = NextDayUtil.calculateNextDay(date);//计算下一天的日期
+                    date = DateUtil.calculateNextDay(date);//计算下一天的日期
                 }
                 weatherDbOpenHelper.saveFutureWeather(weatherList);//保存数据到数据库
                 return true;

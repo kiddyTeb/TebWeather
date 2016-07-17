@@ -190,7 +190,8 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * @param weatherBean
      */
     public void saveWeather(Context context,WeatherBean weatherBean) {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        //SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        SharedPreferences.Editor editor = context.getSharedPreferences("data" , Context.MODE_PRIVATE).edit();
         editor.putString("city", weatherBean.getCityName());
         editor.putString("time",weatherBean.getPublishTime());
         editor.putString("date_y", weatherBean.getTodayDate());
