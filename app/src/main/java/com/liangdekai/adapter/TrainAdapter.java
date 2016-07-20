@@ -19,10 +19,8 @@ import java.util.List;
 public class TrainAdapter extends BaseAdapter{
     private List<TrainBean> mTrainBeanList;
     private Context mContext;
-    private int mResourceId;
 
-    public TrainAdapter(Context context , int textViewResourceId , List<TrainBean> list){
-        this.mResourceId = textViewResourceId;
+    public TrainAdapter(Context context ,List<TrainBean> list){
         this.mContext = context;
         this.mTrainBeanList = list;
     }
@@ -47,7 +45,7 @@ public class TrainAdapter extends BaseAdapter{
         View view;
         ViewHolder viewHolder;
         if (convertView == null){
-            view = LayoutInflater.from(mContext).inflate(mResourceId,null);
+            view = LayoutInflater.from(mContext).inflate(R.layout.adapter_train,null);
             viewHolder = new ViewHolder();
             viewHolder.ivImage = (ImageView) view.findViewById(R.id.adapter_iv_row);//获取控件实例
             viewHolder.tvStartStation = (TextView) view.findViewById(R.id.adapter_tv_startStation);

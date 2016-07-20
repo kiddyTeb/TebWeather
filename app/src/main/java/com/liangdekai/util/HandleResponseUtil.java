@@ -25,6 +25,17 @@ public class HandleResponseUtil {
      * @param result
      * @return boolean
      */
+    public static boolean praseCityResponse(WeatherDbOpenHelper weatherDbOpenHelper, String result){
+
+    }
+
+
+    /**
+     * 对城市的JSON数据进行解析保存
+     * @param weatherDbOpenHelper
+     * @param result
+     * @return boolean
+     */
     public static boolean handleCityResponse(WeatherDbOpenHelper weatherDbOpenHelper, String result) {
         ProvinceBean provinceBean = new ProvinceBean();
         CityBean cityBean = new CityBean();

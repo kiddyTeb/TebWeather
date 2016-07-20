@@ -18,8 +18,9 @@ public class VolleyHelper {
     public static String result = null;
     public static boolean flag = true;
 
-    public static String sendByVolley( String address ) {
-        RequestQueue requestQueue = Volley.newRequestQueue(MyApplication.getContext(), null);
+    public static String sendByVolley(String address) {
+        //RequestQueue requestQueue = Volley.newRequestQueue(MyApplication.getContext(), null);
+        RequestQueue requestQueue = MyApplication.getRequestQueue();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(address, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -42,6 +43,7 @@ public class VolleyHelper {
                 e.printStackTrace();
             }
         }
+        flag =true;
         return result;
     }
 

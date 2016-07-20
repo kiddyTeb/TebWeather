@@ -4,9 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -15,12 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liangdekai.Fragment.ProgressDialogFragment;
 import com.liangdekai.bean.FutureWeatherBean;
 import com.liangdekai.service.UpdateService;
 import com.liangdekai.util.NetWorkUtil;
-import com.liangdekai.util.HttpCallbackListener;
-import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
 import com.liangdekai.util.MyAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
@@ -84,24 +78,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private View mTravelView;
     private List<FutureWeatherBean> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
-    //private ProgressDialogFragment mProgressDialogFragment = new ProgressDialogFragment();
-    /*private Handler mHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what){
-                case SUCCESS_IN :
-                    mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
-                    closeDialog();
-                    showWeather();
-                    break;
-                case FAIL_OUT :
-                    closeDialog();
-                    Toast.makeText(WeatherActivity.this, "some error!", Toast.LENGTH_LONG).show();
-                    break;
-            }
-        }
-    };*/
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,9 +85,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题栏
         setContentView(R.layout.activity_weather);//加载布局
         initializeView();//初始化控件
-        mBtChooseCity.setOnClickListener(this);//添加事件监听
-        mBtRefresh.setOnClickListener(this);
-        mTravelView.setOnClickListener(this);
+        setOnListener();
         mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
         boolean isFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
         boolean gps = getIntent().getBooleanExtra("gps",false);//判断是否从自动定位进入此界面
@@ -123,7 +97,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 showWeather();//展现天气
             }else if (NetWorkUtil.hasNetWork()){
                 String cityId = getIntent().getStringExtra("cityId");//获取选择的城市ID
-                sendResquest(cityId);//否则通过城市ID发送请求
+                sendResquest(cityId);//通过城市ID发送请求
             } else {
                 Toast.makeText(WeatherActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
                 mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();
@@ -134,13 +108,13 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("test","ss");
         switch (requestCode){
             case 1 :
                 if (resultCode == RESULT_OK){
                     String cityId = data.getStringExtra("cityId");
                     sendResquest(cityId);
                 }
+                break;
         }
     }
 
@@ -153,7 +127,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 startActivityForResult(intent ,1);
                 break;
             case R.id.weather_bt_refresh://点击更新按钮
-                //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);//从文件中获取城市名称
                 SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
                 try {
                     if (NetWorkUtil.hasNetWork()){
@@ -170,6 +143,15 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 startActivity(intentTravel);//启动新活动
                 break;
         }
+    }
+
+    /**
+     * 设置各种事件监听
+     */
+    private void setOnListener(){
+        mBtChooseCity.setOnClickListener(this);//添加事件监听
+        mBtRefresh.setOnClickListener(this);
+        mTravelView.setOnClickListener(this);
     }
 
     /**
@@ -282,16 +264,12 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * 根据城市ID发送请求
      * @param cityId
             */
-            private void sendResquest(String cityId){
+    private void sendResquest(String cityId){
                 String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
-                //new MyAsyncTask().execute(address);//执行查询天气任务
-                //showDialog();
-                //resquestThread(address);
                 new MyAsyncTask(getFragmentManager(), new MyAsyncTask.RequestListener() {
                     @Override
                     public void succeed(String result) {
-                        boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),
-                                mWeatherDbOpenHelper,result);//处理返回数据
+                        boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(), mWeatherDbOpenHelper,result);//处理返回数据
                         if (flag){
                             mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
                             showWeather();
@@ -399,96 +377,5 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
             linearLayout.setBackground(getResources().getDrawable(R.mipmap.app_bg01));
         }
     }
-
-    /*class MyAsyncTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
-        }
-
-        /**
-         * 执行查询天气请求网络的耗时间任务
-         * @param address
-         * @return
-         */
-        /*@Override
-        protected String doInBackground(String... address) {
-            String result ;
-            try {
-                HttpClient httpClient = new DefaultHttpClient();//获取实例
-                HttpGet httpGet = new HttpGet(address[0]);//创建HttpGet对象，传入网络地址
-                HttpResponse httpResponse = httpClient.execute(httpGet);//IOException
-                if (httpResponse.getStatusLine().getStatusCode() == 200){
-                    HttpEntity httpEntity = httpResponse.getEntity();//获取HttpEntity实例
-                    result = EntityUtils.toString(httpEntity,"utf-8");//转换为字符串
-                    return result;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(WeatherActivity.this, "failed!please check your internet or cityName", Toast.LENGTH_LONG).show();
-            }
-            return null;
-        }
-
-        /**
-         * 对返回的结果进行处理收尾工作
-         * @param result
-         */
-        /*@Override
-        protected void onPostExecute(String result) {
-            if (result != null){
-                boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),mWeatherDbOpenHelper,result);//处理返回数据
-                if (flag){
-                    mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
-                    mProgressDialogFragment.dismiss();
-                    showWeather();
-                }
-            }else{
-                mProgressDialogFragment.dismiss();
-                Toast.makeText(WeatherActivity.this, "failed!please check your internet or cityName", Toast.LENGTH_LONG).show();
-            }
-        }
-    }*/
-
-    /**
-     *开启一个线程执行网络请求
-     */
-    /*private void resquestThread(final String address){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpUtil.sendByClient(address, new HttpCallbackListener() {
-                    @Override
-                    public void onFinish(String result) {
-                        if (result != null){
-                            boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),mWeatherDbOpenHelper,result);//处理返回数据
-                            if (flag){
-                                mHandler.obtainMessage(SUCCESS_IN).sendToTarget();
-                            }
-                        }else{
-                            mHandler.obtainMessage(FAIL_OUT).sendToTarget();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        mHandler.obtainMessage(FAIL_OUT).sendToTarget();
-                    }
-                });
-            }
-        }).start();
-    }
-
-
-    /*private void showDialog(){
-        mProgressDialogFragment = new ProgressDialogFragment();
-        mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
-    }
-
-    private void closeDialog(){
-        if (mProgressDialogFragment != null){
-            mProgressDialogFragment.dismiss();
-        }
-    }*/
 
 }

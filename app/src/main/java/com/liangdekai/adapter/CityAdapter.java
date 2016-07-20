@@ -19,10 +19,8 @@ import java.util.List;
 public class CityAdapter extends BaseAdapter {
     private Context mContext;
     private List<String> mList;
-    private int mResourceId;
 
-    public CityAdapter(Context context , int textViewResourceId , List<String> list){
-        this.mResourceId = textViewResourceId;
+    public CityAdapter(Context context, List<String> list){
         this.mContext = context;
         this.mList = list;
     }
@@ -62,7 +60,7 @@ public class CityAdapter extends BaseAdapter {
         View view;
         ViewHolder viewHolder;
         if (convertView == null) {
-            view = LayoutInflater.from(mContext).inflate(mResourceId, null);
+            view = LayoutInflater.from(mContext).inflate(R.layout.adapter_city, null);
             viewHolder = new ViewHolder();
             viewHolder.imageView = (ImageView) view.findViewById(R.id.adapter_iv_image);
             viewHolder.textView = (TextView) view.findViewById(R.id.adapter_tv_cityName);

@@ -67,14 +67,13 @@ public class ChooseActivity extends Activity {
         mLvShowCity.setOnItemClickListener(new AdapterView.OnItemClickListener() {//设置ListView事件监听
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-               judgeClickItem(position);
+                    judgeClickItem(position);
             }
         });
         mSvSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {//设置搜索事件监听
             @Override
             public boolean onQueryTextSubmit(String s) {
-                boolean flag = judgeSearchCity(s);
-                return flag;
+                return judgeSearchCity(s);
             }
 
             @Override
@@ -165,10 +164,11 @@ public class ChooseActivity extends Activity {
         mSvSearch.setIconifiedByDefault(false);//设置不自动缩小为图标
         mSvSearch.setSubmitButtonEnabled(true);//显示搜索按钮
         mSvSearch.setQueryHint("请输入查询的城市");//设置显示提示文本信息
-        mCityAdapter = new CityAdapter(this,R.layout.adapter_city, mList);
+        mCityAdapter = new CityAdapter(this, mList);
         mLvShowCity.setAdapter(mCityAdapter);//建立ListView与数据的关联
         mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
     }
+
 
     /**
      * ListView的点击判断逻辑
@@ -178,15 +178,15 @@ public class ChooseActivity extends Activity {
             mSelectedProvinceName = mProvinceBeanList.get(position).getProvinceName();//若点击相应省份，则显示相应城市
             searchCity(mSelectedProvinceName);
         } else if (mLevel.equals("city")) {
-            if (mSelected.equals("")){
+            if (mSelected.equals("")) {
                 Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
                 intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
                 startActivity(intent);
                 finish();//关闭当前活动
-            }else{
-                Intent intent = new Intent() ;
+            } else {
+                Intent intent = new Intent();
                 intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
-                setResult(RESULT_OK , intent);
+                setResult(RESULT_OK, intent);
                 finish();//关闭当前活动
             }
         }
@@ -259,11 +259,6 @@ public class ChooseActivity extends Activity {
         myAsyncTask.execute(address);
     }
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     /**
      * 重写BACK键方法

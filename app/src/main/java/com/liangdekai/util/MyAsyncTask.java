@@ -9,9 +9,9 @@ import com.liangdekai.Fragment.ProgressDialogFragment;
  * Created by asus on 2016/7/19.
  */
 public class MyAsyncTask extends AsyncTask<String , Void , String >{
-    private FragmentManager mFragmentManager ;
+    private FragmentManager mFragmentManager = null;
     private RequestListener mRequestListener;
-    private ProgressDialogFragment mProgressDialogFragment ;
+    private ProgressDialogFragment mProgressDialogFragment = null;
 
     public interface RequestListener {
         void succeed(String result);
@@ -29,13 +29,14 @@ public class MyAsyncTask extends AsyncTask<String , Void , String >{
 
     @Override
     protected void onPreExecute() {
-        showDialog();
+        if (mFragmentManager != null){
+            showDialog();
+        }
     }
 
     @Override
     protected String doInBackground(String... address) {
-        String result = VolleyHelper.sendByVolley(address[0]);
-        return result;
+        return VolleyHelper.sendByVolley(address[0]);
     }
 
 

@@ -65,7 +65,7 @@ public class TravelActivity extends Activity implements View.OnClickListener {
      * 创建适配器配置数据
      */
     private void loadData(){
-        TrainAdapter trainAdapter = new TrainAdapter(TravelActivity.this,R.layout.adapter_train,mTrainList);//创建自定义适配器对象
+        TrainAdapter trainAdapter = new TrainAdapter(TravelActivity.this, mTrainList);//创建自定义适配器对象
         ListView listView = (ListView) findViewById(R.id.weather_lv_train);
         listView.setAdapter(trainAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//设置点击事件
