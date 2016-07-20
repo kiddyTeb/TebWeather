@@ -22,6 +22,7 @@ import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
+import com.liangdekai.util.MyAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
 import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
@@ -34,8 +35,6 @@ import java.util.List;
  * 显示天气信息
  */
 public class WeatherActivity extends Activity implements View.OnClickListener {
-    public static final int SUCCESS_IN = 0;
-    public static final int FAIL_OUT =1;
     private TextView mTvCity;
     private TextView mTvPublishTime;
     private TextView mTvDate;
@@ -86,8 +85,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private List<FutureWeatherBean> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
     //private ProgressDialogFragment mProgressDialogFragment = new ProgressDialogFragment();
-    private ProgressDialogFragment mProgressDialogFragment;
-    private Handler mHandler = new Handler(){
+    /*private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
@@ -102,7 +100,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                     break;
             }
         }
-    };
+    };*/
 
 
     @Override
@@ -283,12 +281,30 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     /**
      * 根据城市ID发送请求
      * @param cityId
-     */
-    private void sendResquest(String cityId){
-        String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
-        //new MyAsyncTask().execute(address);//执行查询天气任务
-        showDialog();
-        resquestThread(address);
+            */
+            private void sendResquest(String cityId){
+                String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
+                //new MyAsyncTask().execute(address);//执行查询天气任务
+                //showDialog();
+                //resquestThread(address);
+                new MyAsyncTask(getFragmentManager(), new MyAsyncTask.RequestListener() {
+                    @Override
+                    public void succeed(String result) {
+                        boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),
+                                mWeatherDbOpenHelper,result);//处理返回数据
+                        if (flag){
+                            mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
+                            showWeather();
+                        }else {
+                            Toast.makeText(WeatherActivity.this, "数据解析失败...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+            @Override
+            public void failed() {
+                Toast.makeText(WeatherActivity.this, "网络请求失败...", Toast.LENGTH_SHORT).show();
+            }
+        }).execute(address);
     }
 
     /**
@@ -299,8 +315,24 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private void findWeatherByGps(String latitude , String longtitude){
         String address = "http://v.juhe.cn/weather/geo?format=1&key=5b34e560321fd5f86680b4deb1e30ad8&lon="+longtitude+"&lat="+latitude;
         //new MyAsyncTask().execute(address);//执行查询天气任务
-        showDialog();
-        resquestThread(address);
+        new MyAsyncTask(getFragmentManager(), new MyAsyncTask.RequestListener() {
+            @Override
+            public void succeed(String result) {
+                boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),
+                        mWeatherDbOpenHelper,result);//处理返回数据
+                if (flag){
+                    mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
+                    showWeather();
+                }else {
+                    Toast.makeText(WeatherActivity.this, "数据解析失败...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void failed() {
+                Toast.makeText(WeatherActivity.this, "网络请求失败...", Toast.LENGTH_SHORT).show();
+            }
+        }).execute(address);
     }
 
     /**
@@ -421,7 +453,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     /**
      *开启一个线程执行网络请求
      */
-    private void resquestThread(final String address){
+    /*private void resquestThread(final String address){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -448,7 +480,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     }
 
 
-    private void showDialog(){
+    /*private void showDialog(){
         mProgressDialogFragment = new ProgressDialogFragment();
         mProgressDialogFragment.show(getFragmentManager(), "progressDialog");
     }
@@ -457,6 +489,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         if (mProgressDialogFragment != null){
             mProgressDialogFragment.dismiss();
         }
-    }
+    }*/
 
 }

@@ -89,34 +89,41 @@ public class TravelActivity extends Activity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.weather_bt_find :
-                boolean flag = true;
-                boolean start = false;//初始站是否合法
-                boolean stop = false;//终点站是否合法
-                String startStation = mEtStart.getText().toString();//获取初始站城市名称
-                String stopStation = mEtStop.getText().toString();//获取终点站城市名称
-                if (startStation.equals("")||stopStation.equals("")) {
-                    Toast.makeText(TravelActivity.this,"请不要输入空值",Toast.LENGTH_LONG).show();//空值判断并提示
-                }else {
-                    if (mCityList.size() == 0){
-                        mCityList = mWeatherDbOpenHelper.loadAllCity();//若容器为空，则到数据库中获取
-                    }
-                    for (int i = 0 ; i<mCityList.size() ; i++){
-                        if (startStation.equals(mCityList.get(i).getCityName())){//初始站存在此城市
-                            start = true;
-                        }
-                        if (stopStation.equals(mCityList.get(i).getCityName())){//终点站存在此城市
-                            stop = true;
-                        }
-                    }
-                    if (start && stop){//同时合法，则进行查询
-                        search(startStation, stopStation);
-                        flag = false;
-                    }
-                    if (flag){
-                        Toast.makeText(TravelActivity.this,"请输入合法的城市名字",Toast.LENGTH_LONG).show();//否则进行对用户提示
-                    }
-                }
+                judgeTravel();
                 break;
+        }
+    }
+
+    /**
+     * 判断班次是否合法逻辑判断
+     */
+    private void judgeTravel(){
+        boolean flag = true;
+        boolean start = false;//初始站是否合法
+        boolean stop = false;//终点站是否合法
+        String startStation = mEtStart.getText().toString();//获取初始站城市名称
+        String stopStation = mEtStop.getText().toString();//获取终点站城市名称
+        if (startStation.equals("")||stopStation.equals("")) {
+            Toast.makeText(TravelActivity.this,"请不要输入空值",Toast.LENGTH_LONG).show();//空值判断并提示
+        }else {
+            if (mCityList.size() == 0){
+                mCityList = mWeatherDbOpenHelper.loadAllCity();//若容器为空，则到数据库中获取
+            }
+            for (int i = 0 ; i<mCityList.size() ; i++){
+                if (startStation.equals(mCityList.get(i).getCityName())){//初始站存在此城市
+                    start = true;
+                }
+                if (stopStation.equals(mCityList.get(i).getCityName())){//终点站存在此城市
+                    stop = true;
+                }
+            }
+            if (start && stop){//同时合法，则进行查询
+                search(startStation, stopStation);
+                flag = false;
+            }
+            if (flag){
+                Toast.makeText(TravelActivity.this,"请输入合法的城市名字",Toast.LENGTH_LONG).show();//否则进行对用户提示
+            }
         }
     }
 

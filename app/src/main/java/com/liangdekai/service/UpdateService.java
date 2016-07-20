@@ -19,6 +19,7 @@ import com.liangdekai.util.HandleResponseUtil;
 import com.liangdekai.util.HttpCallbackListener;
 import com.liangdekai.util.HttpUtil;
 import com.liangdekai.util.MyApplication;
+import com.liangdekai.util.MyAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
 
 import java.io.UnsupportedEncodingException;
@@ -76,62 +77,21 @@ public class UpdateService extends Service{
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
             String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
-            //new MyAsyncTask().execute(address);//启动更新任务
-            resquestThread(address);
+            new MyAsyncTask(new MyAsyncTask.RequestListener() {
+                @Override
+                public void succeed(String result) {
+                    WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(UpdateService.this);
+                    HandleResponseUtil.handleWeatherResponse(UpdateService.this, weatherDbOpenHelper, result);
+                }
+
+                @Override
+                public void failed() {
+                    Log.d("test", "error");
+                }
+            }).execute(address);
         } catch (UnsupportedEncodingException e) {//不支持编码异常，说明字符编码有问题
             e.printStackTrace();
         }
-    }
-
-    /*class MyAsyncTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... address) {
-            String result ;
-            try {
-                HttpClient httpClient = new DefaultHttpClient();//获取实例
-                HttpGet httpGet = new HttpGet(address[0]);//创建HttpGet对象，传入网络地址
-                HttpResponse httpResponse = httpClient.execute(httpGet);//IOException
-                if (httpResponse.getStatusLine().getStatusCode() == 200){
-                    HttpEntity httpEntity = httpResponse.getEntity();//获取HttpEntity实例
-                    result = EntityUtils.toString(httpEntity,"utf-8");//转换为字符串
-                    return result;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(MyApplication.getContext());
-                HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(), weatherDbOpenHelper, result);//处理结果
-            }
-        }
-    }*/
-
-    private void resquestThread(final String address){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpUtil.sendByConnection(address, new HttpCallbackListener() {
-                    @Override
-                    public void onFinish(String result) {
-                        if (result != null) {
-                            WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(MyApplication.getContext());
-                            HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(), weatherDbOpenHelper, result);//处理结果
-                        }
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        Log.d("test", "error");
-                    }
-                });
-            }
-        }).start();
     }
 
 }

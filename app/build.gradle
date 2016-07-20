@@ -30,4 +30,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:20.+'
     compile files('libs/locSDK_6.23.jar')
+    compile files('libs/volley.jar')
 }

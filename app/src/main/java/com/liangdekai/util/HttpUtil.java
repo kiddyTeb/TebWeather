@@ -19,7 +19,7 @@ import java.net.URL;
  */
 public class HttpUtil {
 
-        public static void sendByConnection(final String address , final HttpCallbackListener listener){
+        public static void sendByConnection( String address ,  HttpCallbackListener listener){
                 HttpURLConnection connection = null ;
                 InputStream inputStream = null ;
                 BufferedReader bufferedReader = null ;
