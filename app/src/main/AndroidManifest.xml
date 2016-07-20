@@ -45,14 +45,6 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name="com.liangdekai.activity.TravelActivity">
-
-        </activity>
-
-        <activity android:name="com.liangdekai.activity.WebActivity">
-
-        </activity>
-
         <service android:name="com.liangdekai.service.UpdateService">
 
         </service>

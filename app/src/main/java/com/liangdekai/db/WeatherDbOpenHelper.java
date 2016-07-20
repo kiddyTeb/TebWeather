@@ -6,12 +6,10 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.preference.PreferenceManager;
 
-import com.liangdekai.bean.CityBean;
-import com.liangdekai.bean.FutureWeatherBean;
-import com.liangdekai.bean.ProvinceBean;
-import com.liangdekai.bean.WeatherBean;
+import com.liangdekai.bean.CityInfo;
+import com.liangdekai.bean.FutureWeatherInfo;
+import com.liangdekai.bean.TodayInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,12 +45,12 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
 
     /**
      * 保存省份信息
-     * @param provinceBean
+     * @param provinceName
      */
-    public void saveProvince(ProvinceBean provinceBean){
+    public void saveProvince(String provinceName){
         ContentValues values = new ContentValues();//使用ContentValues对要添加的数据进行组装
-        if (provinceBean !=null){
-            values.put("provinceName", provinceBean.getProvinceName());
+        if (provinceName !=null){
+            values.put("provinceName", provinceName);
             mDatabase.insert("Province",null,values);//插入数据
         }
     }
@@ -61,31 +59,30 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * 加载省份信息
      * @return provinceBeanList
      */
-    public List<ProvinceBean> loadProvince(){
-        List<ProvinceBean> provinceBeanList = new ArrayList<ProvinceBean>();
+    public List<String> loadProvince(){
+        List<String> provinceNameList = new ArrayList<String>();
         Cursor cursor = mDatabase.query("Province",null,null,null,null,null,null);//根据表名查询表中全部数据
         if (cursor.moveToFirst()){
             do {
                 String provinceName = cursor.getString(cursor.getColumnIndexOrThrow("provinceName"));
-                provinceBeanList.add(new ProvinceBean(provinceName));
+                provinceNameList.add(provinceName);
             }while(cursor.moveToNext());
         }
         if (cursor != null){
             cursor.close();
         }
-        return provinceBeanList;
+        return provinceNameList;
     }
 
     /**
      * 保存城市数据
-     * @param cityBean
+     * @param cityInfo
      */
-    public void saveCity(CityBean cityBean){
+    public void saveCity(CityInfo cityInfo){
         ContentValues values = new ContentValues();//使用ContentValues对要添加的数据进行组装
-        if(cityBean !=null){
-            values.put("cityId", cityBean.getCityId());//存储城市数据
-            values.put("cityName", cityBean.getCityName());
-            values.put("provinceName", cityBean.getProvinceName());
+        if(cityInfo !=null){
+            values.put("cityName", cityInfo.getCity());
+            values.put("provinceName", cityInfo.getProvince());
             mDatabase.insert("City",null,values);//插入数据库当中
         }
     }
@@ -95,47 +92,45 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * @param provinceName
      * @return cityBeanList
      */
-    public List<CityBean> loadCity(String provinceName){
-        List<CityBean> cityBeanList = new ArrayList<CityBean>();
+    public List<String> loadCity(String provinceName){
+        List<String> cityInfoList = new ArrayList<String>();
         Cursor cursor = mDatabase.query("City",null,"provinceName = ?",new String[]{provinceName},null,null,null);//根据表名查询表中符合省份名字的城市数据
         if(cursor.moveToFirst()){
             do {
-                String cityId = cursor.getString(cursor.getColumnIndexOrThrow("cityId"));
                 String cityName = cursor.getString(cursor.getColumnIndexOrThrow("cityName"));
-                cityBeanList.add(new CityBean(cityId,cityName));
+                cityInfoList.add(cityName);
             }while(cursor.moveToNext());
         }
         if (cursor != null){
             cursor.close();
         }
-        return cityBeanList;
+        return cityInfoList;
     }
 
     /**
      * 加载所有城市，用于判断
      * @return cityBeanList
      */
-    public List<CityBean> loadAllCity(){
-        List<CityBean> cityBeanList = new ArrayList<CityBean>();
+    public List<String> loadAllCity(){
+        List<String> cityNameList = new ArrayList<String>();
         Cursor cursor = mDatabase.query("City",null,null,null,null,null,null);//根据表名查询表中符合省份名字的城市数据
         if(cursor.moveToFirst()){
             do {
-                String cityId = cursor.getString(cursor.getColumnIndexOrThrow("cityId"));
                 String cityName = cursor.getString(cursor.getColumnIndexOrThrow("cityName"));
-                cityBeanList.add(new CityBean(cityId,cityName));
+                cityNameList.add(cityName);
             }while(cursor.moveToNext());
         }
         if (cursor != null){
             cursor.close();
         }
-        return cityBeanList;
+        return cityNameList;
     }
 
     /**
      * 保存未来六日天气的信息
      * @param weatherList
      */
-    public void saveFutureWeather(List<FutureWeatherBean> weatherList){
+    public void saveFutureWeather(List<FutureWeatherInfo> weatherList){
         ContentValues values = new ContentValues();//使用ContentValues对要添加的数据进行组装
         deleteWeather();//保存新的一批天气信息之前，对原本数据进行删除
         for(int i = 0;i<weatherList.size();i++) {
@@ -143,7 +138,7 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
             values.put("weather", weatherList.get(i).getWeather());
             values.put("temperature", weatherList.get(i).getTemperature());
             values.put("wind", weatherList.get(i).getWind());
-            values.put("weatherId",weatherList.get(i).getWeatherId());
+            values.put("weatherId" , weatherList.get(i).getWeatherId().getWeatherId());
             mDatabase.insert("Weather", null, values);//插入数据
         }
     }
@@ -152,8 +147,8 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * 加载未来六日天气信息
      * @return weatherList
      */
-    public List<FutureWeatherBean> loadFutureWeather(){
-        List<FutureWeatherBean> weatherList = new ArrayList<FutureWeatherBean>();
+    public List<FutureWeatherInfo> loadFutureWeather(){
+        List<FutureWeatherInfo> weatherList = new ArrayList<FutureWeatherInfo>();
         Cursor cursor = mDatabase.query("Weather",null,null,null,null,null,null);//根据表名查询表中全部数据
         if (cursor.moveToFirst()){
             do {
@@ -162,7 +157,7 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
                 String temperature = cursor.getString(cursor.getColumnIndexOrThrow("temperature"));
                 String wind = cursor.getString(cursor.getColumnIndexOrThrow("wind"));
                 String weatherId = cursor.getString(cursor.getColumnIndexOrThrow("weatherId"));
-                weatherList.add(new FutureWeatherBean(week,weather,temperature,wind,weatherId));
+                weatherList.add(new FutureWeatherInfo(week,weather,temperature,wind,weatherId));
             }while (cursor.moveToNext());
         }
         if (cursor != null){
@@ -187,22 +182,22 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
     /**
      * 保存当日天气的信息
      * @param context
-     * @param weatherBean
+     * @param todayInfo
      */
-    public void saveWeather(Context context,WeatherBean weatherBean) {
+    public void saveWeather(Context context, TodayInfo todayInfo) {
         //SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         SharedPreferences.Editor editor = context.getSharedPreferences("data" , Context.MODE_PRIVATE).edit();
-        editor.putString("city", weatherBean.getCityName());
-        editor.putString("time",weatherBean.getPublishTime());
-        editor.putString("date_y", weatherBean.getTodayDate());
-        editor.putString("wind", weatherBean.getWind());
-        editor.putString("weather", weatherBean.getWeather());
-        editor.putString("temperature", weatherBean.getTemperature());
-        editor.putString("dressing_index", weatherBean.getDress());
-        editor.putString("travel_index", weatherBean.getTravel());
-        editor.putString("exercise_index", weatherBean.getSport());
-        editor.putString("uv_index", weatherBean.getUv());
-        editor.putString("dressing_advice", weatherBean.getSuggestion());
+        editor.putString("city", todayInfo.getCity());
+        editor.putString("time",todayInfo.getWeek());
+        editor.putString("date_y", todayInfo.getDate());
+        editor.putString("wind", todayInfo.getWind());
+        editor.putString("weather", todayInfo.getWeather());
+        editor.putString("temperature", todayInfo.getTemperature());
+        editor.putString("dressing_index", todayInfo.getDress());
+        editor.putString("travel_index", todayInfo.getTravel());
+        editor.putString("exercise_index", todayInfo.getSport());
+        editor.putString("uv_index", todayInfo.getRay());
+        editor.putString("dressing_advice", todayInfo.getAdvice());
         editor.apply();
     }
 

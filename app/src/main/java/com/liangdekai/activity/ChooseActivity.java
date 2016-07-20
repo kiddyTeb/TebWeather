@@ -16,8 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liangdekai.adapter.CityAdapter;
-import com.liangdekai.bean.CityBean;
-import com.liangdekai.bean.ProvinceBean;
 import com.liangdekai.util.MyAsyncTask;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.LocationUtil;
@@ -36,8 +34,8 @@ import java.util.List;
 public class ChooseActivity extends Activity {
     private CityAdapter mCityAdapter;
     private List<String> mList = new ArrayList<String>();
-    private List<ProvinceBean> mProvinceBeanList = new ArrayList<ProvinceBean>();
-    private List<CityBean> mCityBeanList = new ArrayList<CityBean>();
+    private List<String> mProvinceNameList = new ArrayList<String>();
+    private List<String> mCityNameList = new ArrayList<String>();
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
     private ListView mLvShowCity;
     private TextView mTvTitle;
@@ -115,12 +113,12 @@ public class ChooseActivity extends Activity {
      * 加载省份列表
      */
     private void searchProvince() {
-        mProvinceBeanList = mWeatherDbOpenHelper.loadProvince();
-        if (mProvinceBeanList.size() > 0) {//若数据库中不存在省份信息
+        mProvinceNameList = mWeatherDbOpenHelper.loadProvince();
+        if (mProvinceNameList.size() > 0) {//若数据库中不存在省份信息
             mList.clear();
             mTvTitle.setText("省份");
-            for (int i = 0; i < mProvinceBeanList.size(); i++) {
-                mList.add(mProvinceBeanList.get(i).getProvinceName());//添加城市名字到容器中
+            for (int i = 0; i < mProvinceNameList.size(); i++) {
+                mList.add(mProvinceNameList.get(i));//添加城市名字到容器中
             }
             mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
             mLvShowCity.setSelection(0);//将数据定位到第一行
@@ -141,11 +139,11 @@ public class ChooseActivity extends Activity {
      * @param provinceName
      */
     private void searchCity(String provinceName) {
-        mCityBeanList = mWeatherDbOpenHelper.loadCity(provinceName);
+        mCityNameList = mWeatherDbOpenHelper.loadCity(provinceName);
         mTvTitle.setText(provinceName);
         mList.clear();
-        for (int i = 0; i < mCityBeanList.size(); i++) {
-            mList.add(mCityBeanList.get(i).getCityName());
+        for (int i = 0; i < mCityNameList.size(); i++) {
+            mList.add(mCityNameList.get(i));
         }
         mCityAdapter.notifyDataSetChanged();//通知列表发生变化
         mLvShowCity.setSelection(0);//将数据定位到第一行
@@ -175,17 +173,17 @@ public class ChooseActivity extends Activity {
      */
     private void judgeClickItem(int position){
         if (mLevel.equals("province")) {
-            mSelectedProvinceName = mProvinceBeanList.get(position).getProvinceName();//若点击相应省份，则显示相应城市
+            mSelectedProvinceName = mProvinceNameList.get(position);//若点击相应省份，则显示相应城市
             searchCity(mSelectedProvinceName);
         } else if (mLevel.equals("city")) {
             if (mSelected.equals("")) {
                 Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
-                intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
+                intent.putExtra("cityId", mCityNameList.get(position));//将点击的城市ID信息传递给另外一个活动
                 startActivity(intent);
                 finish();//关闭当前活动
             } else {
                 Intent intent = new Intent();
-                intent.putExtra("cityId", mCityBeanList.get(position).getCityId());//将点击的城市ID信息传递给另外一个活动
+                intent.putExtra("cityId", mCityNameList.get(position));//将点击的城市ID信息传递给另外一个活动
                 setResult(RESULT_OK, intent);
                 finish();//关闭当前活动
             }
@@ -201,19 +199,19 @@ public class ChooseActivity extends Activity {
             if (TextUtils.isEmpty(s)){//判断是否为空值
                 Toast.makeText(ChooseActivity.this, "输入不能为空~", Toast.LENGTH_LONG).show();
             }else {
-                if (mCityBeanList.size() == 0){//若容器为空，则加载数据库中的数据
-                    mCityBeanList = mWeatherDbOpenHelper.loadAllCity();
+                if (mCityNameList.size() == 0){//若容器为空，则加载数据库中的数据
+                    mCityNameList = mWeatherDbOpenHelper.loadAllCity();
                 }
 
-                for (int i= 0 ; i < mProvinceBeanList.size(); i++){
-                    if (s.equals(mProvinceBeanList.get(i).getProvinceName())){
+                for (int i = 0; i < mProvinceNameList.size(); i++){
+                    if (s.equals(mProvinceNameList.get(i))){
                         searchCity(s);
                         return true;
                     }
                 }
 
-                for (int i = 0; i < mCityBeanList.size(); i++) {
-                    if (s.equals(mCityBeanList.get(i).getCityName())){
+                for (int i = 0; i < mCityNameList.size(); i++) {
+                    if (s.equals(mCityNameList.get(i))){
                         String cityNameUTF = URLEncoder.encode(s,"UTF-8");//将城市的名字转换为utf8 URLENCLODE格式
                         intent.putExtra("cityId", cityNameUTF);
                         startActivity(intent);
@@ -242,7 +240,8 @@ public class ChooseActivity extends Activity {
             public void succeed(String result) {
                 if (result != null){
                     boolean flag = false;
-                    flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
+                    //flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
+                    flag = HandleResponseUtil.praseCityResponse(mWeatherDbOpenHelper , result);
                     if (flag){
                         searchProvince();//查询省份
                     }

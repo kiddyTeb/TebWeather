@@ -43,8 +43,6 @@ public class UpdateService extends Service{
                 updateWeather();//开启线程去更新天气信息
             }
         }).start();
-
-        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
         Intent notificationIntent = new Intent(this, WeatherActivity.class);
         notificationIntent.putExtra("backFromChooseActivity",true);//设置标识
@@ -76,12 +74,12 @@ public class UpdateService extends Service{
         String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
-            String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
+            String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=2&key=5b34e560321fd5f86680b4deb1e30ad8";
             new MyAsyncTask(new MyAsyncTask.RequestListener() {
                 @Override
                 public void succeed(String result) {
                     WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(UpdateService.this);
-                    HandleResponseUtil.handleWeatherResponse(UpdateService.this, weatherDbOpenHelper, result);
+                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDbOpenHelper , result);
                 }
 
                 @Override

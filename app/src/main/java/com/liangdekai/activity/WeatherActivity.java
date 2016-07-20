@@ -12,10 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liangdekai.bean.FutureWeatherBean;
+import com.liangdekai.bean.FutureWeatherInfo;
 import com.liangdekai.service.UpdateService;
 import com.liangdekai.util.NetWorkUtil;
-import com.liangdekai.util.MyApplication;
 import com.liangdekai.util.MyAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
 import com.liangdekai.db.WeatherDbOpenHelper;
@@ -75,8 +74,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private Button mBtChooseCity;
     private Button mBtRefresh;
     private LinearLayout mLlBackground;
-    private View mTravelView;
-    private List<FutureWeatherBean> mWeatherList;
+    private List<FutureWeatherInfo> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
 
     @Override
@@ -138,10 +136,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                     e.printStackTrace();
                 }
                 break;
-            case R.id.weather_ll_travel:
-                Intent intentTravel = new Intent(WeatherActivity.this,TravelActivity.class);
-                startActivity(intentTravel);//启动新活动
-                break;
         }
     }
 
@@ -151,7 +145,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private void setOnListener(){
         mBtChooseCity.setOnClickListener(this);//添加事件监听
         mBtRefresh.setOnClickListener(this);
-        mTravelView.setOnClickListener(this);
     }
 
     /**
@@ -203,7 +196,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         mTvFutureTempSix = (TextView) findViewById(R.id.weather_tv_futureTempSix);
         mTvFutureWindSix = (TextView) findViewById(R.id.weather_tv_futureWindSix);
         mLlBackground = (LinearLayout) findViewById(R.id.weather_ll_background);
-        mTravelView = findViewById(R.id.weather_ll_travel);
     }
 
 
@@ -227,32 +219,32 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         mTvAdvice.setText(preferences.getString("dressing_advice",""));
 
         mTvFutureDayOne.setText(mWeatherList.get(0).getWeek());
-        changeImage(mIvFutureImageOne,mWeatherList.get(0).getWeatherId());
+        changeImage(mIvFutureImageOne,mWeatherList.get(0).getId());
         mTvFutureWeatherOne.setText(mWeatherList.get(0).getWeather());
         mTvFutureTempOne.setText(mWeatherList.get(0).getTemperature());
         mTvFutureWindOne.setText(mWeatherList.get(0).getWind());
         mTvFutureDayTwo.setText(mWeatherList.get(1).getWeek());
-        changeImage(mIvFutureImageTwo,mWeatherList.get(1).getWeatherId());
+        changeImage(mIvFutureImageTwo,mWeatherList.get(1).getId());
         mTvFutureWeatherTwo.setText(mWeatherList.get(1).getWeather());
         mTvFutureTempTwo.setText(mWeatherList.get(1).getTemperature());
         mTvFutureWindTwo.setText(mWeatherList.get(1).getWind());
         mTvFutureDayThree.setText(mWeatherList.get(2).getWeek());
-        changeImage(mIvFutureImageThree,mWeatherList.get(2).getWeatherId());
+        changeImage(mIvFutureImageThree,mWeatherList.get(2).getId());
         mTvFutureWeatherThree.setText(mWeatherList.get(2).getWeather());
         mTvFutureTempThree.setText(mWeatherList.get(2).getTemperature());
         mTvFutureWindThree.setText(mWeatherList.get(2).getWind());
         mTvFutureDayForth.setText(mWeatherList.get(3).getWeek());
-        changeImage(mIvFutureImageForth,mWeatherList.get(3).getWeatherId());
+        changeImage(mIvFutureImageForth,mWeatherList.get(3).getId());
         mTvFutureWeatherForth.setText(mWeatherList.get(3).getWeather());
         mTvFutureTempForth.setText(mWeatherList.get(3).getTemperature());
         mTvFutureWindForth.setText(mWeatherList.get(3).getWind());
         mTvFutureDayFifth.setText(mWeatherList.get(4).getWeek());
-        changeImage(mIvFutureImageFifth,mWeatherList.get(4).getWeatherId());
+        changeImage(mIvFutureImageFifth,mWeatherList.get(4).getId());
         mTvFutureWeatherFifth.setText(mWeatherList.get(4).getWeather());
         mTvFutureTempFifth.setText(mWeatherList.get(4).getTemperature());
         mTvFutureWindFifth.setText(mWeatherList.get(4).getWind());
         mTvFutureDaySix.setText(mWeatherList.get(5).getWeek());
-        changeImage(mIvFutureImageSix,mWeatherList.get(5).getWeatherId());
+        changeImage(mIvFutureImageSix,mWeatherList.get(5).getId());
         mTvFutureWeatherSix.setText(mWeatherList.get(5).getWeather());
         mTvFutureTempSix.setText(mWeatherList.get(5).getTemperature());
         mTvFutureWindSix.setText(mWeatherList.get(5).getWind());
@@ -265,11 +257,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * @param cityId
             */
     private void sendResquest(String cityId){
-                String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=&key=5b34e560321fd5f86680b4deb1e30ad8";
+                String address = "http://v.juhe.cn/weather/index?cityname="+cityId+"&dtype=&format=2&key=5b34e560321fd5f86680b4deb1e30ad8";
                 new MyAsyncTask(getFragmentManager(), new MyAsyncTask.RequestListener() {
                     @Override
                     public void succeed(String result) {
-                        boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(), mWeatherDbOpenHelper,result);//处理返回数据
+                        boolean flag = HandleResponseUtil.praseWeatherResponse(WeatherActivity.this , mWeatherDbOpenHelper , result);
                         if (flag){
                             mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
                             showWeather();
@@ -291,13 +283,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * @param longtitude
      */
     private void findWeatherByGps(String latitude , String longtitude){
-        String address = "http://v.juhe.cn/weather/geo?format=1&key=5b34e560321fd5f86680b4deb1e30ad8&lon="+longtitude+"&lat="+latitude;
-        //new MyAsyncTask().execute(address);//执行查询天气任务
+        String address = "http://v.juhe.cn/weather/geo?format=2&key=5b34e560321fd5f86680b4deb1e30ad8&lon="+longtitude+"&lat="+latitude;
         new MyAsyncTask(getFragmentManager(), new MyAsyncTask.RequestListener() {
             @Override
             public void succeed(String result) {
-                boolean flag = HandleResponseUtil.handleWeatherResponse(MyApplication.getContext(),
-                        mWeatherDbOpenHelper,result);//处理返回数据
+                boolean flag = HandleResponseUtil.praseWeatherResponse(WeatherActivity.this , mWeatherDbOpenHelper , result);
                 if (flag){
                     mWeatherList = mWeatherDbOpenHelper.loadFutureWeather();//加载未来天气信息
                     showWeather();
