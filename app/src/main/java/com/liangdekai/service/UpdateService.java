@@ -16,9 +16,6 @@ import android.util.Log;
 import com.liangdekai.activity.WeatherActivity;
 import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
-import com.liangdekai.util.HttpCallbackListener;
-import com.liangdekai.util.HttpUtil;
-import com.liangdekai.util.MyApplication;
 import com.liangdekai.util.MyAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
 

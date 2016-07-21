@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.liangdekai.MyApplication;
+
 /**
  * Created by asus on 2016/7/15.
  */

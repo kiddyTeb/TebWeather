@@ -1,4 +1,4 @@
-package com.liangdekai.util;
+package com.liangdekai;
 
 import android.app.Application;
 import android.content.Context;
