@@ -1,11 +1,23 @@
 package com.liangdekai.bean;
 
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by asus on 2016/7/20.
  */
-public class FutureWeatherInfo {
+public class FutureWeatherInfo{
+    private String city;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     private String temperature ;
     private String weather ;
     private String wind ;
@@ -55,7 +67,8 @@ public class FutureWeatherInfo {
     private String week ;
     private String id ;
 
-    public FutureWeatherInfo(String week , String weather ,String temperature , String wind ,String id){
+    public FutureWeatherInfo(String city ,String week , String weather ,String temperature , String wind ,String id){
+        this.city = city ;
         this.week = week ;
         this.weather = weather ;
         this.temperature = temperature ;

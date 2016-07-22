@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.liangdekai.activity.WeatherActivity"
+            android:name="com.liangdekai.activity.MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
         </activity>

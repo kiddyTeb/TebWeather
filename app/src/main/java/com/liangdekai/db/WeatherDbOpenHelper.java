@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.liangdekai.bean.CityInfo;
 import com.liangdekai.bean.FutureWeatherInfo;
@@ -13,6 +14,7 @@ import com.liangdekai.bean.TodayInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 负责创建数据库以及一些对数据库操作的方法
@@ -22,7 +24,7 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
     public static final String CREATE_PROVINCE="create table Province(provinceName text)";//创建数据库的语句
     public static final String CREATE_CITY = "create table City(cityId integer primary key autoincrement,"
             +"cityName text, provinceName text)";
-    public static final String CREATE_WEATHER = "create table Weather(week text,weather text,temperature text,wind text,weatherId text)";
+    public static final String CREATE_WEATHER = "create table Weather(city text,week text,weather text,temperature text,wind text,weatherId text)";
     public static final String DB_NAME = "weather";//数据库名字
     public static final int VERSION = 1;//数据库版本
     private SQLiteDatabase mDatabase;
@@ -132,8 +134,9 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      */
     public void saveFutureWeather(List<FutureWeatherInfo> weatherList){
         ContentValues values = new ContentValues();//使用ContentValues对要添加的数据进行组装
-        deleteWeather();//保存新的一批天气信息之前，对原本数据进行删除
+        //deleteWeather();//保存新的一批天气信息之前，对原本数据进行删除
         for(int i = 0;i<weatherList.size();i++) {
+            values.put("city", weatherList.get(i).getCity());
             values.put("week", weatherList.get(i).getWeek());
             values.put("weather", weatherList.get(i).getWeather());
             values.put("temperature", weatherList.get(i).getTemperature());
@@ -147,17 +150,18 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * 加载未来六日天气信息
      * @return weatherList
      */
-    public List<FutureWeatherInfo> loadFutureWeather(){
+    public List<FutureWeatherInfo> loadFutureWeather(String cityName){
         List<FutureWeatherInfo> weatherList = new ArrayList<FutureWeatherInfo>();
-        Cursor cursor = mDatabase.query("Weather",null,null,null,null,null,null);//根据表名查询表中全部数据
+        Cursor cursor = mDatabase.query("Weather",null,"city = ?",new String[]{cityName},null,null,null);//根据表名查询表中全部数据
         if (cursor.moveToFirst()){
             do {
+                String city = cursor.getString(cursor.getColumnIndexOrThrow("city"));
                 String week = cursor.getString(cursor.getColumnIndexOrThrow("week"));
                 String weather = cursor.getString((cursor.getColumnIndexOrThrow("weather")));
                 String temperature = cursor.getString(cursor.getColumnIndexOrThrow("temperature"));
                 String wind = cursor.getString(cursor.getColumnIndexOrThrow("wind"));
                 String weatherId = cursor.getString(cursor.getColumnIndexOrThrow("weatherId"));
-                weatherList.add(new FutureWeatherInfo(week,weather,temperature,wind,weatherId));
+                weatherList.add(new FutureWeatherInfo(city ,week,weather,temperature,wind,weatherId));
             }while (cursor.moveToNext());
         }
         if (cursor != null){
@@ -184,9 +188,14 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * @param context
      * @param todayInfo
      */
-    public void saveWeather(Context context, TodayInfo todayInfo) {
+    public void saveWeather(Context context, TodayInfo todayInfo , boolean flag) {
         //SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        SharedPreferences.Editor editor = context.getSharedPreferences("data" , Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor ;
+        if (flag){
+            editor = context.getSharedPreferences(todayInfo.getCity() , Context.MODE_PRIVATE).edit();
+        }else {
+            editor = context.getSharedPreferences("data" , Context.MODE_PRIVATE).edit();
+        }
         editor.putString("city", todayInfo.getCity());
         editor.putString("time",todayInfo.getWeek());
         editor.putString("date_y", todayInfo.getDate());
@@ -198,6 +207,38 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
         editor.putString("exercise_index", todayInfo.getSport());
         editor.putString("uv_index", todayInfo.getRay());
         editor.putString("dressing_advice", todayInfo.getAdvice());
+        editor.apply();
+    }
+
+    /**
+     * 保存常用城市
+     */
+    public void saveCommonCity(Context context , String cityName){
+        SharedPreferences.Editor editor = context.getSharedPreferences("common" , Context.MODE_APPEND).edit();
+        editor.putString(cityName , cityName);
+        editor.apply();
+    }
+
+    /**
+     * 加载所有常用城市
+     */
+    public List<String> loadCommonCity(Context context){
+        List<String> cityList = new ArrayList<String>();
+        SharedPreferences preferences = context.getSharedPreferences("common" , Context.MODE_APPEND) ;
+        Map<String, ?> map = preferences.getAll();
+        for (Map.Entry<String , ? > entry : map.entrySet()){
+            cityList.add(entry.getValue()+"");
+        }
+        return cityList;
+    }
+
+    /**
+     * 删除常用城市
+     */
+    public void deleteCommonCity(Context context , String cityName){
+        SharedPreferences preferences = context.getSharedPreferences("common" , Context.MODE_APPEND) ;
+        SharedPreferences.Editor editor= preferences.edit();
+        editor.remove(cityName);
         editor.apply();
     }
 

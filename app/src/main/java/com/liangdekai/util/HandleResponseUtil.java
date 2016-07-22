@@ -48,12 +48,12 @@ public class HandleResponseUtil {
      * @param result
      * @return boolean
      */
-    public static boolean praseWeatherResponse(Context context , WeatherDbOpenHelper weatherDbOpenHelper , String result){
+    public static boolean praseWeatherResponse(Context context , WeatherDbOpenHelper weatherDbOpenHelper , String result , String city , boolean flag){
         Gson gson = new Gson();
         JsonWeather jsonWeather = gson.fromJson(result , JsonWeather.class);
         WeatherInfo weatherInfo = jsonWeather.getWeatherInfo();
         TodayInfo todayInfo = weatherInfo.getTodayInfo();
-        weatherDbOpenHelper.saveWeather(context , todayInfo);
+        weatherDbOpenHelper.saveWeather(context , todayInfo , flag);
 
         List<FutureWeatherInfo> futureWeatherInfoList = weatherInfo.getFutureWeatherInfoList();
         List<FutureWeatherInfo> futureWeatherList = new ArrayList<FutureWeatherInfo>();
@@ -61,6 +61,7 @@ public class HandleResponseUtil {
             FutureWeatherInfo futureWeatherInfo = futureWeatherInfoList.get(i);
             WeatherId weather = futureWeatherInfoList.get(i).getWeatherId();
             futureWeatherInfo.setId(weather.getWeatherId());
+            futureWeatherInfo.setCity(city);
             futureWeatherList.add(futureWeatherInfo);
         }
         weatherDbOpenHelper.saveFutureWeather(futureWeatherList);

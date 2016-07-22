@@ -16,7 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liangdekai.adapter.CityAdapter;
-import com.liangdekai.util.MyAsyncTask;
+import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.LocationUtil;
 import com.liangdekai.weather_liangdekai.R;
@@ -53,7 +53,7 @@ public class ChooseActivity extends Activity {
         mFromWeatherActivity = getIntent().getBooleanExtra("fromWeatherActivity",false);//判断是否从展示天气界面处跳转而来
         mSelected = preferences.getString("city","");//获取文件中的城市名称，若没有，视为首次进行选择操作
         if(!mFromWeatherActivity && !mSelected.equals("")){//不从天气展示页面处跳转而来并且也有选择城市，则直接跳转到天气展示界面
-            Intent intent = new Intent(ChooseActivity.this,WeatherActivity.class);
+            Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
             intent.putExtra("backFromChooseActivity",true);//设置非第一次操作的标识
             startActivity(intent);
             finish();
@@ -91,7 +91,7 @@ public class ChooseActivity extends Activity {
                 LocationUtil locationUtil = new LocationUtil(new LocationUtil.LocationListener() {
                     @Override
                     public void succeed(String latitude, String longtitude) {//若定位成功则回调改方法
-                        Intent intent = new Intent(ChooseActivity.this,WeatherActivity.class);
+                        Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
                         intent.putExtra("gps",true);//设置标志
                         intent.putExtra("latitude",latitude);//携带经度纬度的数据开启活动
                         intent.putExtra("longtitude",longtitude);
@@ -177,7 +177,7 @@ public class ChooseActivity extends Activity {
             searchCity(mSelectedProvinceName);
         } else if (mLevel.equals("city")) {
             if (mSelected.equals("")) {
-                Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
+                Intent intent = new Intent(ChooseActivity.this, MainActivity.class);
                 intent.putExtra("cityId", mCityNameList.get(position));//将点击的城市ID信息传递给另外一个活动
                 startActivity(intent);
                 finish();//关闭当前活动
@@ -194,7 +194,7 @@ public class ChooseActivity extends Activity {
      * 搜索框对城市搜索的判断逻辑
      */
     private boolean judgeSearchCity(String s){
-        Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
+        Intent intent = new Intent(ChooseActivity.this, MainActivity.class);
         try {
             if (TextUtils.isEmpty(s)){//判断是否为空值
                 Toast.makeText(ChooseActivity.this, "输入不能为空~", Toast.LENGTH_LONG).show();
@@ -235,9 +235,9 @@ public class ChooseActivity extends Activity {
      */
     private void searchByInternet() {
         String address = "http://v.juhe.cn/weather/citys?key=5b34e560321fd5f86680b4deb1e30ad8";
-        MyAsyncTask myAsyncTask = new MyAsyncTask(getFragmentManager(), new MyAsyncTask.RequestListener() {
+        RequestAsyncTask requestAsyncTask = new RequestAsyncTask(getFragmentManager(), new RequestAsyncTask.RequestListener() {
             @Override
-            public void succeed(String result) {
+            public void succeed(String result, String empty, boolean mflag) {
                 if (result != null){
                     boolean flag = false;
                     //flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
@@ -254,8 +254,8 @@ public class ChooseActivity extends Activity {
             public void failed() {
                 Toast.makeText(ChooseActivity.this, "网络请求失败...", Toast.LENGTH_SHORT).show();
             }
-        });
-        myAsyncTask.execute(address);
+        },"" , false);
+        requestAsyncTask.execute(address);
     }
 
 
@@ -267,7 +267,7 @@ public class ChooseActivity extends Activity {
         if(mLevel.equals("city")){
             searchProvince();
         }else if(mFromWeatherActivity){
-            Intent intent = new Intent(ChooseActivity.this,WeatherActivity.class);
+            Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
             intent.putExtra("backFromChooseActivity",true);
             startActivity(intent);
             finish();

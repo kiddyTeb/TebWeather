@@ -11,12 +11,8 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
-import com.liangdekai.activity.WeatherActivity;
-import com.liangdekai.db.WeatherDbOpenHelper;
-import com.liangdekai.util.HandleResponseUtil;
-import com.liangdekai.util.MyAsyncTask;
+import com.liangdekai.activity.MainActivity;
 import com.liangdekai.weather_liangdekai.R;
 
 import java.io.UnsupportedEncodingException;
@@ -41,7 +37,7 @@ public class UpdateService extends Service{
             }
         }).start();
         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
-        Intent notificationIntent = new Intent(this, WeatherActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.putExtra("backFromChooseActivity",true);//设置标识
         PendingIntent pendingIntend = PendingIntent.getActivity(this,0,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);//实现点击效果
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -72,18 +68,20 @@ public class UpdateService extends Service{
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
             String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=2&key=5b34e560321fd5f86680b4deb1e30ad8";
-            new MyAsyncTask(new MyAsyncTask.RequestListener() {
+            /*new RequestAsyncTask(new RequestAsyncTask.RequestListener() {
                 @Override
                 public void succeed(String result) {
                     WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(UpdateService.this);
-                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDbOpenHelper , result);
+                    SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
+                    String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
+                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDbOpenHelper , result , cityName);
                 }
 
                 @Override
                 public void failed() {
                     Log.d("test", "error");
                 }
-            }).execute(address);
+            }).execute(address);*/
         } catch (UnsupportedEncodingException e) {//不支持编码异常，说明字符编码有问题
             e.printStackTrace();
         }

@@ -2,30 +2,33 @@ package com.liangdekai.util;
 
 import android.app.FragmentManager;
 import android.os.AsyncTask;
-import com.liangdekai.Fragment.ProgressDialogFragment;
+
+import com.liangdekai.Fragment.ShowDialog;
 
 
 /**
  * Created by asus on 2016/7/19.
  */
-public class MyAsyncTask extends AsyncTask<String , Void , String >{
+public class RequestAsyncTask extends AsyncTask<String , Void , String >{
     private FragmentManager mFragmentManager = null;
     private RequestListener mRequestListener;
-    private ProgressDialogFragment mProgressDialogFragment = null;
+    private ShowDialog mShowDialog = null;
+    private String mCity ;
+    private boolean flag ;
 
     public interface RequestListener {
-        void succeed(String result);
+        void succeed(String result , String city , boolean flag );
         void failed();
     }
 
-    public MyAsyncTask(FragmentManager fragmentManager , RequestListener requestListener){
-        mFragmentManager = fragmentManager;
-        mRequestListener = requestListener;
+    public RequestAsyncTask(FragmentManager fragmentManager , RequestListener requestListener , String city , boolean flag ){
+        this.mFragmentManager = fragmentManager;
+        this.mRequestListener = requestListener;
+        this.mCity = city;
+        this.flag = flag ;
     }
 
-    public MyAsyncTask(RequestListener requestListener){
-        mRequestListener = requestListener;
-    }
+
 
     @Override
     protected void onPreExecute() {
@@ -43,7 +46,7 @@ public class MyAsyncTask extends AsyncTask<String , Void , String >{
     @Override
     protected void onPostExecute(String result) {
         if (result != null){
-            mRequestListener.succeed(result);
+            mRequestListener.succeed(result , mCity , flag );
         }else{
             mRequestListener.failed();
         }
@@ -51,13 +54,13 @@ public class MyAsyncTask extends AsyncTask<String , Void , String >{
     }
 
     private void showDialog(){
-        mProgressDialogFragment = new ProgressDialogFragment();
-        mProgressDialogFragment.show(mFragmentManager, "progressDialog");
+        mShowDialog = new ShowDialog();
+        mShowDialog.show(mFragmentManager, "progressDialog");
     }
 
     private void closeDialog(){
-        if (mProgressDialogFragment != null){
-            mProgressDialogFragment.dismiss();
+        if (mShowDialog != null){
+            mShowDialog.dismiss();
         }
     }
 }
