@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -59,18 +58,19 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题栏
         setContentView(R.layout.draw_main);//加载布局
-        initializeView();//初始化控件
+        initializeView(getIntent().getStringExtra("cityId"));//初始化控件
         setOnListener();//注册监听事件
         isFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
         boolean gps = getIntent().getBooleanExtra("gps",false);//判断是否从自动定位进入此界面
         if (gps){
-            findWeatherByGps(getIntent().getStringExtra("latitude"),getIntent().getStringExtra("longtitude"),getIntent().getStringExtra("cityId"),isFromChooseActivity);//根据经纬度进行查询天气
+            findWeatherByGps(getIntent().getStringExtra("latitude"),getIntent().getStringExtra("longtitude"),
+                    getIntent().getStringExtra("cityId"),isFromChooseActivity);//根据经纬度进行查询天气
         }else {
-            if (isFromChooseActivity) {//如果是，则直接加载数据库中的内容
-                showWeather();//展现天气
+            if (isFromChooseActivity) {//判断是否非第一次操作
+                showWeather();//展示天气背景
             }else if (NetWorkUtil.hasNetWork()){
-                String cityName = getIntent().getStringExtra("cityId");
-                mList.add(cityName);
+                String cityName = getIntent().getStringExtra("cityId");//获取用户选取的城市
+                mList.add(cityName);//存储用户选择的城市
                 mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
                 sendResquest(cityName , isFromChooseActivity );
             } else {
@@ -80,42 +80,50 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
+    /**
+     * 获取从城市列表返回的数据，进行操作
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String cityName = data.getStringExtra("cityId");
-        boolean flag = false ;
-        switch (requestCode){
-            case 1 :
-                switch (mList.size()){//动态添加城市逻辑
-                    case 0:
+        if (data != null){
+            String cityName = data.getStringExtra("cityId");//获取用户选择的常用城市
+            boolean flag = false ;//选取标志位，确认是否超过城市数量限制范围
+            switch (requestCode){
+                case 1 :
+                    switch (mList.size()){//动态添加城市逻辑
+                        case 0:
+                            break;
+                        case 1:
+                            mSecondCity = ExtraCity.newInstance(cityName);
+                            mFragments.add(mSecondCity);
+                            break;
+                        case 2:
+                            mThirdCity = ExtraCity.newInstance(cityName);
+                            mFragments.add(mThirdCity);
+                            break;
+                        case 3:
+                            mForthCity = ExtraCity.newInstance(cityName);
+                            mFragments.add(mForthCity);
+                        default:
+                            flag = true ;
+                            break;
+                    }
+                    if (flag){
+                        Toast.makeText(this , "已经到达上限" ,Toast.LENGTH_SHORT).show();//对城市添加数量进行限制
                         break;
-                    case 1:
-                        mSecondCity = ExtraCity.newInstance(cityName);
-                        mFragments.add(mSecondCity);
-                        break;
-                    case 2:
-                        mThirdCity = ExtraCity.newInstance(cityName);
-                        mFragments.add(mThirdCity);
-                        break;
-                    case 3:
-                        mForthCity = ExtraCity.newInstance(cityName);
-                        mFragments.add(mForthCity);
-                    default:
-                        flag = true ;
-                        break;
-                }
-                sendResquest(cityName , isFromChooseActivity);
-                if (flag){
-                    Toast.makeText(this , "已经到达上限" ,Toast.LENGTH_SHORT).show();//对城市添加数量进行限制
+                    }
+                    sendResquest(cityName , isFromChooseActivity);
+                    mWeatherDbOpenHelper.saveCommonCity(MainActivity.this , cityName);//存储常用城市到文件
+                    mList.add(cityName);//添加城市到容器中
+                    mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
+                    mDrawerLayout.closeDrawers();//关闭侧滑菜单
+                    mViewPager.setAdapter(fragmentAdapter);//设置ViewPager
+                    fragmentAdapter.notifyDataSetChanged();
                     break;
-                }
-                mWeatherDbOpenHelper.saveCommonCity(MainActivity.this , cityName);
-                mList.add(cityName);
-                mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
-                mDrawerLayout.closeDrawers();
-                mViewPager.setAdapter(fragmentAdapter);
-                fragmentAdapter.notifyDataSetChanged();
-                break;
+            }
         }
     }
 
@@ -152,9 +160,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      * 更新天气逻辑
      */
     private void refresh(){
-        SharedPreferences preferences = getSharedPreferences(mCityFlag , MODE_PRIVATE) ;
         if (NetWorkUtil.hasNetWork()){
-            sendResquest(preferences.getString("city",""), true);//从文件获取城市名字并转换格式，重新发送请求
+            Log.d("test",mCityFlag);
+            Log.d("test",mList.size()+"");
+            //sendResquest(mCityFlag, true);//从文件获取城市名字并转换格式，重新发送请求
         }else {
             Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
         }
@@ -189,10 +198,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //showDialog();
                 if (mList.size()==1){
-                    Toast.makeText(MainActivity.this, "请保留一个城市",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "城市列表不能为空",Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 mWeatherDbOpenHelper.deleteCommonCity(MainActivity.this ,mList.get(i));
+                mWeatherDbOpenHelper.deleteWeather(mList.get(i));//删除城市时，删除该数据库中的天气信息
                 mList.remove(i);
                 mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
                 if (mList.size()<mFragments.size()) {
@@ -252,18 +262,29 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
     /**
-     * 恢复视图
+     * 恢复用户之前添加的城市视图
      */
     private void restore(){
-        mList = mWeatherDbOpenHelper.loadCommonCity(MainActivity.this);
         switch (mList.size()){
-            case 1:
-                break;
-            case 2:
+            case 4:
+                mSecondCity = ExtraCity.newInstance(mList.get(1));
                 mFragments.add(mSecondCity);
+                mThirdCity = ExtraCity.newInstance(mList.get(2));
+                mFragments.add(mThirdCity);
+                mForthCity = ExtraCity.newInstance(mList.get(3));
+                mFragments.add(mForthCity);
                 break;
             case 3:
+                mSecondCity = ExtraCity.newInstance(mList.get(1));
+                mFragments.add(mSecondCity);
+                mThirdCity = ExtraCity.newInstance(mList.get(2));
                 mFragments.add(mThirdCity);
+                break;
+            case 2:
+                mSecondCity = ExtraCity.newInstance(mList.get(1));
+                mFragments.add(mSecondCity);
+                break;
+            case 1:
                 break;
         }
     }
@@ -271,20 +292,27 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     /**
      * 初始化各种控件
      */
-    private void initializeView(){
-        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
+    private void initializeView(String cityName){
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
+        mCityFlag = preferences.getString("city","");
         mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
         mBtChooseCity = (Button) findViewById(R.id.weather_bt_switch);
         mBtRefresh = (Button) findViewById(R.id.weather_bt_refresh);
         mBtAddCity = (Button) findViewById(R.id.weather_bt_add);
         mLvCity = (ListView) findViewById(R.id.show_lv_city);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.weather_ll_background);
-        mList = mWeatherDbOpenHelper.loadCommonCity(MainActivity.this);
+        mList = mWeatherDbOpenHelper.loadCommonCity(MainActivity.this);//加载所有常用城市到容器中
         mCityAdapter = new CityAdapter(this , mList);
         mLvCity.setAdapter(mCityAdapter);
-        cityOnClickListener();
-        mFirstCity = MainCity.newInstance(preferences.getString("city",""));
+        mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
+        cityOnClickListener();//注册事件监听
+        if (!isFromChooseActivity){
+            mFirstCity = MainCity.newInstance(cityName);
+        }else {
+            mFirstCity = MainCity.newInstance(preferences.getString("city",""));
+        }
         mFragments.add(mFirstCity);
+        restore();//恢复用户之前添加的城市视图
         mViewPager = (ViewPager) findViewById(R.id.weather_vp_view);
         fragmentAdapter = new FragmentAdapter(getSupportFragmentManager() , mFragments);
         mViewPager.setAdapter(fragmentAdapter);
@@ -298,15 +326,18 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             public void onPageSelected(int position) {
                 switch (position){
                     case 0:
-                        mCityFlag = mList.get(position);
-                        showWeather();
+                        mCityFlag = mList.get(position);//每次滑动到该页面时，记录下当前页面的城市名字
+                        showWeather();//并且根据天气种类切换背景
                         break;
                     case 1 :
                         mCityFlag = mList.get(position);
-                        mSecondCity.loadData();
                         showWeather();
                         break;
                     case 2:
+                        mCityFlag = mList.get(position);
+                        showWeather();
+                        break;
+                    case 3:
                         mCityFlag = mList.get(position);
                         showWeather();
                         break;
@@ -343,8 +374,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         new RequestAsyncTask(getFragmentManager(), new RequestAsyncTask.RequestListener() {
             @Override
             public void succeed(String result , String city , boolean mflag ) {
+                Log.d("test",result);
                 boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDbOpenHelper , result , city , mflag);
                 if (flag){
+                    if (!isFromChooseActivity){
+                        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
+                        mCityFlag = preferences.getString("city","");
+                        mFirstCity.loadData();
+                    }
                     showWeather();
                 }else {
                     Toast.makeText(MainActivity.this, "数据解析失败...", Toast.LENGTH_SHORT).show();

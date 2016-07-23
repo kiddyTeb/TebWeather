@@ -267,9 +267,6 @@ public class ChooseActivity extends Activity {
         if(mLevel.equals("city")){
             searchProvince();
         }else if(mFromWeatherActivity){
-            Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
-            intent.putExtra("backFromChooseActivity",true);
-            startActivity(intent);
             finish();
         }else {
             finish();

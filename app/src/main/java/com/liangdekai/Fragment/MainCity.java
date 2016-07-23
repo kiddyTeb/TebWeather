@@ -72,6 +72,10 @@ public class MainCity extends Fragment {
     public View onCreateView(LayoutInflater inflater,  ViewGroup container,  Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_show , container , false);
         initView();
+        SharedPreferences preferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE) ;
+        if (!"".equals(preferences.getString("city","")) ){
+            loadData();
+        }
         Log.d("test","onCreateView");
         return view;
     }
@@ -90,7 +94,6 @@ public class MainCity extends Fragment {
         Bundle bundle = this.getArguments();
         if (bundle != null){
             mCityName = bundle.getString("cityName");
-            Log.d("test",mCityName);
         }
         Log.d("test","onCreate");
     }
@@ -99,12 +102,6 @@ public class MainCity extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //MainActivity activity = (MainActivity)getActivity();
-        //activity.loadData();
-        SharedPreferences preferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE) ;
-        if (!"".equals(preferences.getString("city","")) ){
-            loadData();
-        }
     }
 
     @Override
@@ -173,8 +170,8 @@ public class MainCity extends Fragment {
     }
 
     public void loadData(){
-        //List<FutureWeatherInfo> mWeatherList , SharedPreferences preferences
         mWeatherList = mWeatherDbOpenHelper.loadFutureWeather(mCityName);//加载未来天气信息
+        Log.d("test",mCityName);
         SharedPreferences preferences = getActivity().getSharedPreferences("data" , Context.MODE_PRIVATE) ;
         mTvCity.setText(preferences.getString("city",""));//对各种组件进行设置值
         mTvPublishTime.setText(preferences.getString("time",""));

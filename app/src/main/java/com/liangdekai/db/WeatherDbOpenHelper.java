@@ -171,16 +171,10 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
     }
 
     /**
-     * 删除未来天气表中全部数据
+     * 删除城市联动删除数据库中未来的天气中全部数据
      */
-    public void deleteWeather(){
-        Cursor cursor = mDatabase.query("Weather",null,null,null,null,null,null);
-        if(cursor.getCount()!=0) {
-           mDatabase.delete("Weather",null,null);
-        }
-        if (cursor != null){
-            cursor.close();
-        }
+    public void deleteWeather(String cityName){
+        mDatabase.delete("Weather","city = ?",new String[]{cityName});
     }
 
     /**
@@ -189,7 +183,6 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      * @param todayInfo
      */
     public void saveWeather(Context context, TodayInfo todayInfo , boolean flag) {
-        //SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         SharedPreferences.Editor editor ;
         if (flag){
             editor = context.getSharedPreferences(todayInfo.getCity() , Context.MODE_PRIVATE).edit();
