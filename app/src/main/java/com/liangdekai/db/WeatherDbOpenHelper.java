@@ -177,6 +177,7 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
         mDatabase.delete("Weather","city = ?",new String[]{cityName});
     }
 
+
     /**
      * 保存当日天气的信息
      * @param context

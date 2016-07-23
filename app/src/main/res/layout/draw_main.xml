@@ -29,24 +29,31 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:layout_gravity="start"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@mipmap/leimu"
+        >
 
         <ImageView
             android:id="@+id/show_iv_image"
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:background="@mipmap/app_bg_snow"/>
+            android:background="@mipmap/widget_bg"
+            />
 
         <Button
             android:id="@+id/weather_bt_add"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:text="添加常用城市"/>
+            android:drawableStart="@mipmap/add"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:background="@mipmap/widget_bg"
+            android:text="@string/add_city"/>
 
         <ListView
             android:id="@+id/show_lv_city"
             android:layout_width="match_parent"
-            android:layout_height="285dp">
+            android:layout_height="300dp">
 
         </ListView>
 
@@ -58,13 +65,22 @@
                 android:layout_height="match_parent"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:text="设置"/>
+                android:drawableStart="@drawable/settings"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@mipmap/widget_bg"
+                android:text="@string/setting"/>
 
             <Button
+                android:id="@+id/weather_bt_exit"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="退出"/>
+                android:drawableStart="@drawable/close"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@mipmap/widget_bg"
+                android:text="@string/close"/>
 
         </LinearLayout>
 

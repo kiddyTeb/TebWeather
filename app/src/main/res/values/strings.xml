@@ -7,9 +7,7 @@
     <string name="suggestion">生活建议:</string>
     <string name="future">未来六天天气:</string>
     <string name="location">自动定位</string>
-    <string name="title">12306旅游小助手</string>
-    <string name="start">始发站:</string>
-    <string name="stop">终点站:</string>
-    <string name="find">查询</string>
-    <string name="buy">欢迎点击购票</string>
+    <string name="close">退出</string>
+    <string name="setting">设置</string>
+    <string name="add_city">添加常用城市</string>
 </resources>

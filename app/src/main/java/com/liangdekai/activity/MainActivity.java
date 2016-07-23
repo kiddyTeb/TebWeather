@@ -1,5 +1,7 @@
 package com.liangdekai.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import com.liangdekai.Fragment.MainCity;
 import com.liangdekai.Fragment.ExtraCity;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.adapter.FragmentAdapter;
+import com.liangdekai.service.UpdateService;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
@@ -38,6 +41,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private Button mBtChooseCity;
     private Button mBtRefresh;
     private Button mBtAddCity;
+    private Button mBtExit ;
     private DrawerLayout mDrawerLayout;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
     private FragmentAdapter fragmentAdapter;
@@ -50,7 +54,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private CityAdapter mCityAdapter;
     private ListView mLvCity;
     private List<String> mList = new ArrayList<String>();
-    private boolean isFromChooseActivity;
+    private boolean mIsFromChooseActivity;
+    private boolean mIsDelete ;
     private String mCityFlag;
 
     @Override
@@ -58,21 +63,21 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题栏
         setContentView(R.layout.draw_main);//加载布局
-        isFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
+        mIsFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
         initializeView(getIntent().getStringExtra("cityId"));//初始化控件
         setOnListener();//注册监听事件
         boolean gps = getIntent().getBooleanExtra("gps",false);//判断是否从自动定位进入此界面
         if (gps){
             findWeatherByGps(getIntent().getStringExtra("latitude"),getIntent().getStringExtra("longtitude"),
-                    getIntent().getStringExtra("cityId"),isFromChooseActivity);//根据经纬度进行查询天气
+                    getIntent().getStringExtra("cityId"), mIsFromChooseActivity);//根据经纬度进行查询天气
         }else {
-            if (isFromChooseActivity) {//判断是否非第一次操作
+            if (mIsFromChooseActivity) {//判断是否非第一次操作
                 showWeather();//展示天气背景
             }else if (NetWorkUtil.hasNetWork()){
                 String cityName = getIntent().getStringExtra("cityId");//获取用户选取的城市
                 mList.add(cityName);//存储用户选择的城市
                 mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
-                sendResquest(cityName , isFromChooseActivity );
+                sendResquest(cityName , mIsFromChooseActivity);
             } else {
                 Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
                 showWeather();//展现天气
@@ -144,6 +149,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.weather_bt_add ://打开添加常用城市列表
                 openList();
                 break;
+            case R.id.weather_bt_exit :
+                finish();
+                break;
         }
     }
 
@@ -162,9 +170,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private void refresh(){
         if (NetWorkUtil.hasNetWork()){
-            Log.d("test",mCityFlag);
-            Log.d("test",mList.size()+"");
-            sendResquest(mCityFlag, true);//从文件获取城市名字并转换格式，重新发送请求
+            sendResquest(mCityFlag, true);//获取城市名字并转换格式，重新发送请求
         }else {
             Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
         }
@@ -197,20 +203,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mLvCity.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //showDialog();
                 if (mList.size()==1){
                     Toast.makeText(MainActivity.this, "城市列表不能为空",Toast.LENGTH_SHORT).show();
                     return true;
                 }
-                mWeatherDbOpenHelper.deleteCommonCity(MainActivity.this ,mList.get(i));
-                mWeatherDbOpenHelper.deleteWeather(mList.get(i));//删除城市时，删除该数据库中的天气信息
-                mList.remove(i);
-                mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
-                if (mList.size()<mFragments.size()) {
-                    mFragments.remove(i);
-                    fragmentAdapter.notifyDataSetChanged();
+                showDialog();//跳出确认删除对话框
+                if (mIsDelete){
+                    deleteCity(i);
                 }
-                mDrawerLayout.closeDrawers();
                 return true;
             }
         });
@@ -221,7 +221,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     /**
      * 展示一个对话框
      */
-    /*private void showDialog(){
+    private void showDialog(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("请确认");
         alertDialog.setMessage("是否删除该城市");
@@ -229,16 +229,32 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         alertDialog.setPositiveButton("是", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Log.d("test" , i+"");
+                mIsDelete = true ;//确认删除标志
             }
         });
         alertDialog.setNegativeButton("否", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                mIsDelete = false ;//拒绝删除标志
             }
         });
         alertDialog.show();
-    }*/
+    }
+
+    /**
+     * 对常用城市进行删除
+     */
+    private void deleteCity(int i){
+        mWeatherDbOpenHelper.deleteCommonCity(MainActivity.this ,mList.get(i));
+        mWeatherDbOpenHelper.deleteWeather(mList.get(i));//删除城市时，删除该数据库中的天气信息
+        mList.remove(i);
+        mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
+        if (mList.size()<mFragments.size()) {
+            mFragments.remove(i);
+            fragmentAdapter.notifyDataSetChanged();
+        }
+        mDrawerLayout.closeDrawers();
+    }
 
     /**
      * 转换UTF-8格式
@@ -260,6 +276,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mBtChooseCity.setOnClickListener(this);//添加事件监听
         mBtRefresh.setOnClickListener(this);
         mBtAddCity.setOnClickListener(this);
+        mBtExit.setOnClickListener(this);
     }
 
     /**
@@ -299,6 +316,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mBtChooseCity = (Button) findViewById(R.id.weather_bt_switch);
         mBtRefresh = (Button) findViewById(R.id.weather_bt_refresh);
         mBtAddCity = (Button) findViewById(R.id.weather_bt_add);
+        mBtExit = (Button) findViewById(R.id.weather_bt_exit);
         mLvCity = (ListView) findViewById(R.id.show_lv_city);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.weather_ll_background);
         mList = mWeatherDbOpenHelper.loadCommonCity(MainActivity.this);//加载所有常用城市到容器中
@@ -306,7 +324,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mLvCity.setAdapter(mCityAdapter);
         mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
         cityOnClickListener();//注册事件监听
-        if (!isFromChooseActivity){
+        if (!mIsFromChooseActivity){
             mFirstCity = MainCity.newInstance(cityName);
             mWeatherDbOpenHelper.saveCommonCity(this , cityName);
         }else {
@@ -365,10 +383,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     public void showWeather(){
         SharedPreferences preferences = getSharedPreferences(mCityFlag , MODE_PRIVATE) ;
         changeBackground(mDrawerLayout,preferences.getString("weather",""));
-
-        /*Intent intent = new Intent(MainActivity.this, UpdateService.class);
-        startService(intent);//启动更新数据服务*/
-
+        Intent intent = new Intent(MainActivity.this, UpdateService.class);
+        startService(intent);//启动更新数据服务
     }
 
     /**
@@ -384,7 +400,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 Log.d("test",result);
                 boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDbOpenHelper , result , city , mflag);
                 if (flag){
-                    if (!isFromChooseActivity){
+                    if (!mIsFromChooseActivity){
                         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
                         mCityFlag = preferences.getString("city","");
                         mFirstCity.loadData();

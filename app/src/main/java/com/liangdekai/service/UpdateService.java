@@ -13,6 +13,9 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 
 import com.liangdekai.activity.MainActivity;
+import com.liangdekai.db.WeatherDbOpenHelper;
+import com.liangdekai.util.HandleResponseUtil;
+import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
 
 import java.io.UnsupportedEncodingException;
@@ -26,7 +29,6 @@ public class UpdateService extends Service{
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -55,33 +57,32 @@ public class UpdateService extends Service{
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);//获取一个AlarmManager实例
         int sixHour = 6 * 60 * 60 * 1000;//设置定时为6小时的任务
         long sleepTime = SystemClock.elapsedRealtime()+sixHour;//获取系统开机到现在所经历的毫秒数
-        Intent intented = new Intent(this , UpdateReceive.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this,0,intented,0);//获取一个能够执行广播的PendingIntent
+        Intent intented = new Intent(this , UpdateService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this,0,intented,0);//获取一个能够执行广播的PendingIntent
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,sleepTime,pendingIntent);//设置定时任务
         return super.onStartCommand(intent, flags, startId);
     }
 
     public void updateWeather(){
-        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
         String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
             String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=2&key=5b34e560321fd5f86680b4deb1e30ad8";
-            /*new RequestAsyncTask(new RequestAsyncTask.RequestListener() {
+            new RequestAsyncTask(new RequestAsyncTask.RequestListener() {
                 @Override
-                public void succeed(String result) {
+                public void succeed(String result ,String city , boolean flag) {
                     WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(UpdateService.this);
                     SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
                     String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
-                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDbOpenHelper , result , cityName);
+                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDbOpenHelper , result , cityName ,false);
                 }
 
                 @Override
                 public void failed() {
-                    Log.d("test", "error");
+
                 }
-            }).execute(address);*/
+            }).execute(address);
         } catch (UnsupportedEncodingException e) {//不支持编码异常，说明字符编码有问题
             e.printStackTrace();
         }

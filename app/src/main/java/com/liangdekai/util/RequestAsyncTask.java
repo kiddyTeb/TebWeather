@@ -28,7 +28,10 @@ public class RequestAsyncTask extends AsyncTask<String , Void , String >{
         this.flag = flag ;
     }
 
+    public RequestAsyncTask(RequestListener requestListener){
+        this.mRequestListener = requestListener;
 
+    }
 
     @Override
     protected void onPreExecute() {

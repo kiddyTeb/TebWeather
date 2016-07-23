@@ -10,7 +10,7 @@
         android:layout_height="32dp"
         android:layout_marginStart="10dp"
         android:layout_centerVertical="true"
-        android:background="@mipmap/menu_city"
+        android:background="@mipmap/menu"
         />
     <Button
         android:id="@+id/weather_bt_refresh"
