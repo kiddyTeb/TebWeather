@@ -3,6 +3,7 @@ package com.liangdekai.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -72,11 +73,10 @@ public class MainCity extends Fragment {
     public View onCreateView(LayoutInflater inflater,  ViewGroup container,  Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_show , container , false);
         initView();
-        SharedPreferences preferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE) ;
-        if (!"".equals(preferences.getString("city","")) ){
-            loadData();
+        Bundle bundle = this.getArguments();
+        if (bundle != null){
+            mCityName = bundle.getString("cityName");
         }
-        Log.d("test","onCreateView");
         return view;
     }
 
@@ -91,10 +91,6 @@ public class MainCity extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = this.getArguments();
-        if (bundle != null){
-            mCityName = bundle.getString("cityName");
-        }
         Log.d("test","onCreate");
     }
 
@@ -102,6 +98,16 @@ public class MainCity extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("test","onCreateView");
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        SharedPreferences preferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE) ;
+        if (!"".equals(preferences.getString("city","")) ){
+            loadData();
+        }
     }
 
     @Override

@@ -58,9 +58,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题栏
         setContentView(R.layout.draw_main);//加载布局
+        isFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
         initializeView(getIntent().getStringExtra("cityId"));//初始化控件
         setOnListener();//注册监听事件
-        isFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
         boolean gps = getIntent().getBooleanExtra("gps",false);//判断是否从自动定位进入此界面
         if (gps){
             findWeatherByGps(getIntent().getStringExtra("latitude"),getIntent().getStringExtra("longtitude"),
@@ -107,21 +107,22 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                         case 3:
                             mForthCity = ExtraCity.newInstance(cityName);
                             mFragments.add(mForthCity);
+                            break;
                         default:
                             flag = true ;
                             break;
                     }
                     if (flag){
                         Toast.makeText(this , "已经到达上限" ,Toast.LENGTH_SHORT).show();//对城市添加数量进行限制
-                        break;
+                    }else{
+                        sendResquest(cityName , true);
+                        mWeatherDbOpenHelper.saveCommonCity(MainActivity.this , cityName);//存储常用城市到文件
+                        mList.add(cityName);//添加城市到容器中
+                        mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
+                        mDrawerLayout.closeDrawers();//关闭侧滑菜单
+                        mViewPager.setAdapter(fragmentAdapter);//设置ViewPager
+                        fragmentAdapter.notifyDataSetChanged();
                     }
-                    sendResquest(cityName , isFromChooseActivity);
-                    mWeatherDbOpenHelper.saveCommonCity(MainActivity.this , cityName);//存储常用城市到文件
-                    mList.add(cityName);//添加城市到容器中
-                    mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
-                    mDrawerLayout.closeDrawers();//关闭侧滑菜单
-                    mViewPager.setAdapter(fragmentAdapter);//设置ViewPager
-                    fragmentAdapter.notifyDataSetChanged();
                     break;
             }
         }
@@ -163,7 +164,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         if (NetWorkUtil.hasNetWork()){
             Log.d("test",mCityFlag);
             Log.d("test",mList.size()+"");
-            //sendResquest(mCityFlag, true);//从文件获取城市名字并转换格式，重新发送请求
+            sendResquest(mCityFlag, true);//从文件获取城市名字并转换格式，重新发送请求
         }else {
             Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
         }
@@ -294,7 +295,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private void initializeView(String cityName){
         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
-        mCityFlag = preferences.getString("city","");
         mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
         mBtChooseCity = (Button) findViewById(R.id.weather_bt_switch);
         mBtRefresh = (Button) findViewById(R.id.weather_bt_refresh);
@@ -308,6 +308,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         cityOnClickListener();//注册事件监听
         if (!isFromChooseActivity){
             mFirstCity = MainCity.newInstance(cityName);
+            mWeatherDbOpenHelper.saveCommonCity(this , cityName);
         }else {
             mFirstCity = MainCity.newInstance(preferences.getString("city",""));
         }
@@ -328,18 +329,24 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     case 0:
                         mCityFlag = mList.get(position);//每次滑动到该页面时，记录下当前页面的城市名字
                         showWeather();//并且根据天气种类切换背景
+                        Log.d("test","更新第一张");
                         break;
                     case 1 :
                         mCityFlag = mList.get(position);
                         showWeather();
+                        mSecondCity.loadData();
+                        Log.d("test","更新第二张");
                         break;
                     case 2:
                         mCityFlag = mList.get(position);
                         showWeather();
+                        mThirdCity.loadData();
+                        Log.d("test","更新第3张");
                         break;
                     case 3:
                         mCityFlag = mList.get(position);
                         showWeather();
+                        mForthCity.loadData();
                         break;
                 }
             }

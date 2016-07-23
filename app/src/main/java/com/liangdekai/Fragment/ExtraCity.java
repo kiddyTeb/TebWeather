@@ -66,7 +66,6 @@ public class ExtraCity extends Fragment {
     private View view ;
     private List<FutureWeatherInfo> mWeatherList;
     private WeatherDbOpenHelper mWeatherDbOpenHelper;
-    private SharedPreferences preferences ;
     private String mCityName;
 
     @Override
@@ -100,10 +99,6 @@ public class ExtraCity extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences preferences = getActivity().getSharedPreferences(mCityName, Context.MODE_PRIVATE) ;
-        if (!"".equals(preferences.getString("city","")) ){
-            loadData();
-        }
     }
 
     @Override
