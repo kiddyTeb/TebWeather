@@ -13,7 +13,7 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 
 import com.liangdekai.activity.MainActivity;
-import com.liangdekai.db.WeatherDbOpenHelper;
+import com.liangdekai.db.WeatherDB;
 import com.liangdekai.util.HandleResponseUtil;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
@@ -75,10 +75,10 @@ public class UpdateService extends Service{
             new RequestAsyncTask(new RequestAsyncTask.RequestListener() {
                 @Override
                 public void succeed(String result ,String city , boolean flag) {
-                    WeatherDbOpenHelper weatherDbOpenHelper = new WeatherDbOpenHelper(UpdateService.this);
+                    WeatherDB weatherDB = WeatherDB.getInstance(UpdateService.this);
                     SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
                     String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
-                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDbOpenHelper , result , cityName ,false);
+                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDB , result , cityName ,false);
                 }
 
                 @Override

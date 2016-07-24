@@ -10,7 +10,7 @@ import com.liangdekai.bean.JsonWeather;
 import com.liangdekai.bean.TodayInfo;
 import com.liangdekai.bean.WeatherId;
 import com.liangdekai.bean.WeatherInfo;
-import com.liangdekai.db.WeatherDbOpenHelper;
+import com.liangdekai.db.WeatherDB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +21,11 @@ import java.util.List;
 public class HandleResponseUtil {
     /**
      * 对城市的JSON数据进行解析保存
-     * @param weatherDbOpenHelper
+     * @param weatherDB
      * @param result
      * @return boolean
      */
-    public static boolean praseCityResponse(WeatherDbOpenHelper weatherDbOpenHelper, String result){
+    public static boolean praseCityResponse(WeatherDB weatherDB, String result){
         Gson gson = new Gson();
         String provinceName = "";
         JsonCity jsonCity = gson.fromJson(result , JsonCity.class);
@@ -33,10 +33,10 @@ public class HandleResponseUtil {
         for (int i = 0 ; i < cityInfoList.size() ; i++){
             CityInfo cityInfo = cityInfoList.get(i);
             if (!provinceName.equals(cityInfo.getProvince())){
-                weatherDbOpenHelper.saveProvince(cityInfo.getProvince());
+                weatherDB.saveProvince(cityInfo.getProvince());
                 provinceName = cityInfo.getProvince();
             }
-            weatherDbOpenHelper.saveCity(cityInfo);
+            weatherDB.saveCity(cityInfo);
         }
         return true;
     }
@@ -44,16 +44,16 @@ public class HandleResponseUtil {
     /**
      * 对天气的信息进行解析保存
      * @param context
-     * @param weatherDbOpenHelper
+     * @param weatherDB
      * @param result
      * @return boolean
      */
-    public static boolean praseWeatherResponse(Context context , WeatherDbOpenHelper weatherDbOpenHelper , String result , String city , boolean flag){
+    public static boolean praseWeatherResponse(Context context , WeatherDB weatherDB , String result , String city , boolean flag){
         Gson gson = new Gson();
         JsonWeather jsonWeather = gson.fromJson(result , JsonWeather.class);
         WeatherInfo weatherInfo = jsonWeather.getWeatherInfo();
         TodayInfo todayInfo = weatherInfo.getTodayInfo();
-        weatherDbOpenHelper.saveWeather(context , todayInfo , flag);
+        weatherDB.saveWeather(context , todayInfo , flag);
 
         List<FutureWeatherInfo> futureWeatherInfoList = weatherInfo.getFutureWeatherInfoList();
         List<FutureWeatherInfo> futureWeatherList = new ArrayList<FutureWeatherInfo>();
@@ -64,7 +64,7 @@ public class HandleResponseUtil {
             futureWeatherInfo.setCity(city);
             futureWeatherList.add(futureWeatherInfo);
         }
-        weatherDbOpenHelper.saveFutureWeather(futureWeatherList);
+        weatherDB.saveFutureWeather(futureWeatherList);
         return true;
     }
 

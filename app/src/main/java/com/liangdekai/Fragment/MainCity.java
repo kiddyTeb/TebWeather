@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.liangdekai.bean.FutureWeatherInfo;
-import com.liangdekai.db.WeatherDbOpenHelper;
+import com.liangdekai.db.WeatherDB;
 import com.liangdekai.weather_liangdekai.R;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class MainCity extends Fragment {
     private TextView mTvFutureTempSix;
     private TextView mTvFutureWindSix;
     private View view ;
-    private WeatherDbOpenHelper mWeatherDbOpenHelper;
+    private WeatherDB mWeatherDB;
     private String mCityName;
 
     @Override
@@ -171,11 +171,11 @@ public class MainCity extends Fragment {
         mTvFutureTempSix = (TextView) view.findViewById(R.id.weather_tv_futureTempSix);
         mTvFutureWindSix = (TextView) view.findViewById(R.id.weather_tv_futureWindSix);
 
-        mWeatherDbOpenHelper = new WeatherDbOpenHelper(getActivity());
+        mWeatherDB = WeatherDB.getInstance(getActivity());
     }
 
     public void loadData(){
-        List<FutureWeatherInfo> weatherList = mWeatherDbOpenHelper.loadFutureWeather(mCityName);
+        List<FutureWeatherInfo> weatherList = mWeatherDB.loadFutureWeather(mCityName);
         SharedPreferences preferences = getActivity().getSharedPreferences("data" , Context.MODE_PRIVATE) ;
         mTvCity.setText(preferences.getString("city",""));//对各种组件进行设置值
         mTvPublishTime.setText(preferences.getString("time",""));

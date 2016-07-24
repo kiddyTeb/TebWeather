@@ -16,11 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liangdekai.adapter.CityAdapter;
+import com.liangdekai.db.WeatherDB;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.LocationUtil;
 import com.liangdekai.weather_liangdekai.R;
-import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -36,7 +36,7 @@ public class ChooseActivity extends Activity {
     private List<String> mList = new ArrayList<String>();
     private List<String> mProvinceNameList = new ArrayList<String>();
     private List<String> mCityNameList = new ArrayList<String>();
-    private WeatherDbOpenHelper mWeatherDbOpenHelper;
+    private WeatherDB mWeatherDB ;
     private ListView mLvShowCity;
     private TextView mTvTitle;
     private Button mBtLocation;
@@ -125,7 +125,7 @@ public class ChooseActivity extends Activity {
      * 加载省份列表
      */
     private void searchProvince() {
-        mProvinceNameList = mWeatherDbOpenHelper.loadProvince();
+        mProvinceNameList = mWeatherDB.loadProvince();
         if (mProvinceNameList.size() > 0) {//若数据库中不存在省份信息
             mList.clear();
             mTvTitle.setText("省份");
@@ -151,7 +151,7 @@ public class ChooseActivity extends Activity {
      * @param provinceName
      */
     private void searchCity(String provinceName) {
-        mCityNameList = mWeatherDbOpenHelper.loadCity(provinceName);
+        mCityNameList = mWeatherDB.loadCity(provinceName);
         mTvTitle.setText(provinceName);
         mList.clear();
         for (int i = 0; i < mCityNameList.size(); i++) {
@@ -176,7 +176,7 @@ public class ChooseActivity extends Activity {
         mSvSearch.setQueryHint("请输入查询的城市");//设置显示提示文本信息
         mCityAdapter = new CityAdapter(this, mList);
         mLvShowCity.setAdapter(mCityAdapter);//建立ListView与数据的关联
-        mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
+        mWeatherDB = WeatherDB.getInstance(this);
     }
 
 
@@ -212,7 +212,7 @@ public class ChooseActivity extends Activity {
                 Toast.makeText(ChooseActivity.this, "输入不能为空~", Toast.LENGTH_LONG).show();
             }else {
                 if (mCityNameList.size() == 0){//若容器为空，则加载数据库中的数据
-                    mCityNameList = mWeatherDbOpenHelper.loadAllCity();
+                    mCityNameList = mWeatherDB.loadAllCity();
                 }
 
                 for (int i = 0; i < mProvinceNameList.size(); i++){
@@ -252,7 +252,7 @@ public class ChooseActivity extends Activity {
             public void succeed(String result, String empty, boolean mflag) {
                 if (result != null){
                     boolean flag = false;
-                    flag = HandleResponseUtil.praseCityResponse(mWeatherDbOpenHelper , result);
+                    flag = HandleResponseUtil.praseCityResponse(mWeatherDB , result);
                     if (flag){
                         searchProvince();//查询省份
                     }

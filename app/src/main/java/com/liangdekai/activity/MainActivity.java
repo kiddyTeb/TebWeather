@@ -17,11 +17,11 @@ import com.liangdekai.Fragment.MainCity;
 import com.liangdekai.Fragment.ExtraCity;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.adapter.FragmentAdapter;
+import com.liangdekai.db.WeatherDB;
 import com.liangdekai.service.UpdateService;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
-import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -44,7 +44,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private Button mBtAddCity;
     private Button mBtExit ;
     private DrawerLayout mDrawerLayout;
-    private WeatherDbOpenHelper mWeatherDbOpenHelper;
+    private WeatherDB mWeatherDB;
     private FragmentAdapter fragmentAdapter;
     private List<Fragment> mFragments = new ArrayList<Fragment>();
     private MainCity mFirstCity;
@@ -101,43 +101,47 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (data != null){
-            String cityName = data.getStringExtra("cityId");//获取用户选择的常用城市
-            boolean flag = false ;//选取标志位，确认是否超过城市数量限制范围
-            switch (requestCode){
-                case 1 :
-                    switch (mList.size()){//动态添加城市逻辑
-                        case 0:
-                            break;
-                        case 1:
-                            mSecondCity = ExtraCity.newInstance(cityName);
-                            mFragments.add(mSecondCity);
-                            break;
-                        case 2:
-                            mThirdCity = ExtraCity.newInstance(cityName);
-                            mFragments.add(mThirdCity);
-                            break;
-                        case 3:
-                            mForthCity = ExtraCity.newInstance(cityName);
-                            mFragments.add(mForthCity);
-                            break;
-                        default:
-                            flag = true ;
-                            break;
-                    }
-                    if (flag){
-                        Toast.makeText(this , "已经到达上限" ,Toast.LENGTH_SHORT).show();//对城市添加数量进行限制
-                    }else{
-                        sendResquest(cityName , true);
-                        mWeatherDbOpenHelper.saveCommonCity(MainActivity.this , cityName);//存储常用城市到文件
-                        mList.add(cityName);//添加城市到容器中
-                        mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
-                        mDrawerLayout.closeDrawers();//关闭侧滑菜单
-                        mViewPager.setAdapter(fragmentAdapter);//设置ViewPager
-                        fragmentAdapter.notifyDataSetChanged();
-                    }
-                    break;
+        if (NetWorkUtil.hasNetWork()){
+            if (data != null){
+                String cityName = data.getStringExtra("cityId");//获取用户选择的常用城市
+                boolean flag = false ;//选取标志位，确认是否超过城市数量限制范围
+                switch (requestCode){
+                    case 1 :
+                        switch (mList.size()){//动态添加城市逻辑
+                            case 0:
+                                break;
+                            case 1:
+                                mSecondCity = ExtraCity.newInstance(cityName);
+                                mFragments.add(mSecondCity);
+                                break;
+                            case 2:
+                                mThirdCity = ExtraCity.newInstance(cityName);
+                                mFragments.add(mThirdCity);
+                                break;
+                            case 3:
+                                mForthCity = ExtraCity.newInstance(cityName);
+                                mFragments.add(mForthCity);
+                                break;
+                            default:
+                                flag = true ;
+                                break;
+                        }
+                        if (flag){
+                            Toast.makeText(this , "已经到达上限" ,Toast.LENGTH_SHORT).show();//对城市添加数量进行限制
+                        }else{
+                            sendResquest(cityName , true);
+                            mWeatherDB.saveCommonCity(MainActivity.this , cityName);//存储常用城市到文件
+                            mList.add(cityName);//添加城市到容器中
+                            mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
+                            mDrawerLayout.closeDrawers();//关闭侧滑菜单
+                            mViewPager.setAdapter(fragmentAdapter);//设置ViewPager
+                            fragmentAdapter.notifyDataSetChanged();
+                        }
+                        break;
+                }
             }
+        }else {
+            Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
         }
     }
 
@@ -250,8 +254,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      * 对常用城市进行删除
      */
     private void deleteCity(){
-        mWeatherDbOpenHelper.deleteCommonCity(MainActivity.this ,mList.get(mPosition));
-        mWeatherDbOpenHelper.deleteWeather(mList.get(mPosition));//删除城市时，删除该数据库中的天气信息
+        mWeatherDB.deleteCommonCity(MainActivity.this ,mList.get(mPosition));
+        mWeatherDB.deleteWeather(mList.get(mPosition));//删除城市时，删除该数据库中的天气信息
         mList.remove(mPosition);
         mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
         if (mList.size()<mFragments.size()) {
@@ -316,7 +320,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      * 初始化各种控件
      */
     private void initializeView(){
-        mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
+        mWeatherDB = WeatherDB.getInstance(this);
         mBtChooseCity = (Button) findViewById(R.id.weather_bt_switch);
         mBtRefresh = (Button) findViewById(R.id.weather_bt_refresh);
         mBtAddCity = (Button) findViewById(R.id.weather_bt_add);
@@ -331,14 +335,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private void handleFragment(String cityName){
         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
-        mList = mWeatherDbOpenHelper.loadCommonCity(MainActivity.this);//加载所有常用城市到容器中
+        mList = mWeatherDB.loadCommonCity(MainActivity.this);//加载所有常用城市到容器中
         mCityAdapter = new CityAdapter(this , mList);
         mLvCity.setAdapter(mCityAdapter);
         mCityAdapter.notifyDataSetChanged();//通知常用城市列表发生变化,强制调用getView来刷新每个Item的
         cityOnClickListener();//注册事件监听
         if (!mIsFromChooseActivity){
             mFirstCity = MainCity.newInstance(cityName);
-            mWeatherDbOpenHelper.saveCommonCity(this , cityName);
+            mWeatherDB.saveCommonCity(this , cityName);
         }else {
             mFirstCity = MainCity.newInstance(preferences.getString("city",""));
         }
@@ -406,7 +410,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             @Override
             public void succeed(String result , String city , boolean mflag ) {
                 Log.d("test",result);
-                boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDbOpenHelper , result , city , mflag);
+                boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDB , result , city , mflag);
                 if (flag){
                     if (!mIsFromChooseActivity){
                         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
@@ -436,7 +440,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         new RequestAsyncTask(getFragmentManager(), new RequestAsyncTask.RequestListener() {
             @Override
             public void succeed(String result , String city , boolean mflag ) {
-                boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDbOpenHelper , result , city , mflag);
+                boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDB , result , city , mflag);
                 if (flag){
                     if (!mIsFromChooseActivity){
                         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用

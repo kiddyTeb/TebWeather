@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 
 import com.liangdekai.bean.CityInfo;
 import com.liangdekai.bean.FutureWeatherInfo;
@@ -16,31 +15,24 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 负责创建数据库以及一些对数据库操作的方法
+ * 对数据库的一些操作方法进行封装
  */
-public class WeatherDbOpenHelper extends SQLiteOpenHelper{
-
-    public static final String CREATE_PROVINCE="create table Province(provinceName text)";//创建数据库的语句
-    public static final String CREATE_CITY = "create table City(cityId integer primary key autoincrement,"
-            +"cityName text, provinceName text)";
-    public static final String CREATE_WEATHER = "create table Weather(city text,week text,weather text,temperature text,wind text,weatherId text)";
+public class WeatherDB  {
     public static final String DB_NAME = "weather";//数据库名字
     public static final int VERSION = 1;//数据库版本
     private SQLiteDatabase mDatabase;
+    private static WeatherDB weatherDB ;
 
-    public WeatherDbOpenHelper(Context context) {
-        super(context, DB_NAME, null, VERSION);
-        mDatabase = getWritableDatabase();//获取一个对数据库课进行读写操作的对象
-    }
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_PROVINCE);//创建数据库
-        db.execSQL(CREATE_CITY);
-        db.execSQL(CREATE_WEATHER);
+    private WeatherDB(Context context){
+        DBOpenHelper dbOpenHelper = new DBOpenHelper(context , DB_NAME , null , VERSION);
+        mDatabase = dbOpenHelper.getWritableDatabase();
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public synchronized static WeatherDB getInstance(Context context){
+        if (weatherDB == null){
+            weatherDB = new WeatherDB(context);
+        }
+        return weatherDB ;
     }
 
     /**
@@ -231,5 +223,4 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
         editor.remove(cityName);
         editor.apply();
     }
-
 }
