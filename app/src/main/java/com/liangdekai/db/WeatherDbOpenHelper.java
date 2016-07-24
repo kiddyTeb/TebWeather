@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.liangdekai.bean.CityInfo;
 import com.liangdekai.bean.FutureWeatherInfo;
@@ -32,7 +31,6 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
     public WeatherDbOpenHelper(Context context) {
         super(context, DB_NAME, null, VERSION);
         mDatabase = getWritableDatabase();//获取一个对数据库课进行读写操作的对象
-
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -134,7 +132,6 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      */
     public void saveFutureWeather(List<FutureWeatherInfo> weatherList){
         ContentValues values = new ContentValues();//使用ContentValues对要添加的数据进行组装
-        //deleteWeather();//保存新的一批天气信息之前，对原本数据进行删除
         for(int i = 0;i<weatherList.size();i++) {
             values.put("city", weatherList.get(i).getCity());
             values.put("week", weatherList.get(i).getWeek());
@@ -177,7 +174,6 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
         mDatabase.delete("Weather","city = ?",new String[]{cityName});
     }
 
-
     /**
      * 保存当日天气的信息
      * @param context
@@ -185,7 +181,7 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
      */
     public void saveWeather(Context context, TodayInfo todayInfo , boolean flag) {
         SharedPreferences.Editor editor ;
-        if (flag){
+        if (flag){//根据需要选择存储文件位置
             editor = context.getSharedPreferences(todayInfo.getCity() , Context.MODE_PRIVATE).edit();
         }else {
             editor = context.getSharedPreferences("data" , Context.MODE_PRIVATE).edit();
@@ -220,7 +216,7 @@ public class WeatherDbOpenHelper extends SQLiteOpenHelper{
         List<String> cityList = new ArrayList<String>();
         SharedPreferences preferences = context.getSharedPreferences("common" , Context.MODE_APPEND) ;
         Map<String, ?> map = preferences.getAll();
-        for (Map.Entry<String , ? > entry : map.entrySet()){
+        for (Map.Entry<String , ? > entry : map.entrySet()){//从文件中拿出全部信息，利用MAO循环读取所有信息放进容器当中
             cityList.add(entry.getValue()+"");
         }
         return cityList;

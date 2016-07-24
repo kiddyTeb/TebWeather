@@ -7,7 +7,7 @@ import com.liangdekai.Fragment.ShowDialog;
 
 
 /**
- * Created by asus on 2016/7/19.
+ * 该类用作于对网络进行请求数据，并将数据进行回调
  */
 public class RequestAsyncTask extends AsyncTask<String , Void , String >{
     private FragmentManager mFragmentManager = null;
@@ -30,13 +30,12 @@ public class RequestAsyncTask extends AsyncTask<String , Void , String >{
 
     public RequestAsyncTask(RequestListener requestListener){
         this.mRequestListener = requestListener;
-
     }
 
     @Override
     protected void onPreExecute() {
         if (mFragmentManager != null){
-            showDialog();
+            showDialog();//展示一个对话框
         }
     }
 
@@ -53,14 +52,20 @@ public class RequestAsyncTask extends AsyncTask<String , Void , String >{
         }else{
             mRequestListener.failed();
         }
-        closeDialog();//取消进度条
+        closeDialog();//取消对话框
     }
 
+    /**
+     * 展示一个对话框
+     */
     private void showDialog(){
         mShowDialog = new ShowDialog();
         mShowDialog.show(mFragmentManager, "progressDialog");
     }
 
+    /**
+     * 展示一个对话框
+     */
     private void closeDialog(){
         if (mShowDialog != null){
             mShowDialog.dismiss();

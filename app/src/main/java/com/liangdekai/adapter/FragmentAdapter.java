@@ -3,7 +3,6 @@ package com.liangdekai.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,17 +33,4 @@ public class FragmentAdapter extends FragmentStatePagerAdapter {
         return POSITION_NONE;
     }
 
-    /*public void setFragments(List<Fragment> mFragments){
-        if (this.mFragments != null){
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            for (Fragment fragment : this.mFragments){
-                fragmentTransaction.remove(fragment);
-            }
-            fragmentTransaction.commit();
-            fragmentTransaction = null ;
-            fragmentManager.executePendingTransactions();
-        }
-        this.mFragments = mFragments ;
-        notifyDataSetChanged();
-    }*/
 }

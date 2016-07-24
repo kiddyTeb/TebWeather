@@ -1,25 +1,25 @@
 package com.liangdekai.util;
 
 import android.util.Log;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.liangdekai.MyApplication;
-
 import org.json.JSONObject;
 
 
-/**
- * Created by asus on 2016/7/19.
- */
+
 public class VolleyHelper {
     public static String result = null;
     public static boolean flag = true;
 
+    /**
+     * 根据URL对网络进行请求，并将数据返回给调用方
+     * @param address
+     * @return
+     */
     public static String sendByVolley(String address) {
-        //RequestQueue requestQueue = Volley.newRequestQueue(MyApplication.getContext(), null);
         RequestQueue requestQueue = MyApplication.getRequestQueue();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(address, null,
                 new Response.Listener<JSONObject>() {

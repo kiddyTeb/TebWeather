@@ -1,15 +1,10 @@
 package com.liangdekai.activity;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
+
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -30,7 +25,13 @@ import com.liangdekai.db.WeatherDbOpenHelper;
 import com.liangdekai.util.HandleResponseUtil;
 
 import java.io.UnsupportedEncodingException;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import java.net.URLEncoder;
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,8 +56,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private ListView mLvCity;
     private List<String> mList = new ArrayList<String>();
     private boolean mIsFromChooseActivity;
-    private boolean mIsDelete ;
-    private String mCityFlag;
+    private int mPosition ;//记录应该删除的位置
+    private String mCityFlag;//记录当前停留页面的城市名称
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +65,17 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题栏
         setContentView(R.layout.draw_main);//加载布局
         mIsFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
-        initializeView(getIntent().getStringExtra("cityId"));//初始化控件
+        initializeView();//初始化控件
+        handleFragment(getIntent().getStringExtra("cityId"));//处理碎片以及常用城市列表
         setOnListener();//注册监听事件
-        boolean gps = getIntent().getBooleanExtra("gps",false);//判断是否从自动定位进入此界面
-        if (gps){
+        judgePath();//判断进入此界面的方式，并根据不同情况执行不同方法
+    }
+
+    /**
+     * 判断进入此界面的方式，并根据不同情况执行不同方法
+     */
+    private void judgePath(){
+        if (getIntent().getBooleanExtra("gps",false)){//判断是否从自动定位进入此界面
             findWeatherByGps(getIntent().getStringExtra("latitude"),getIntent().getStringExtra("longtitude"),
                     getIntent().getStringExtra("cityId"), mIsFromChooseActivity);//根据经纬度进行查询天气
         }else {
@@ -77,7 +85,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 String cityName = getIntent().getStringExtra("cityId");//获取用户选取的城市
                 mList.add(cityName);//存储用户选择的城市
                 mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
-                sendResquest(cityName , mIsFromChooseActivity);
+                sendResquest(cityName , mIsFromChooseActivity);//根据城市名称发送请求
             } else {
                 Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
                 showWeather();//展现天气
@@ -141,22 +149,23 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.weather_bt_switch:
-                mDrawerLayout.openDrawer(Gravity.START);
+                mDrawerLayout.openDrawer(Gravity.START);//打开侧滑菜单
                 break;
             case R.id.weather_bt_refresh://点击更新按钮
-                refresh();
+                refresh();//根据当前停留页面的城市来更新数据
                 break;
-            case R.id.weather_bt_add ://打开添加常用城市列表
-                openList();
+            case R.id.weather_bt_add :
+                openList();//打开添加常用城市列表
                 break;
             case R.id.weather_bt_exit :
-                finish();
+                mDrawerLayout.closeDrawers();
+                finish();//关闭活动
                 break;
         }
     }
 
     /**
-     * 打开添加常用城市列表
+     * 打开添加所有城市列表
      */
     private void openList(){
         Intent intent = new Intent(MainActivity.this,ChooseActivity.class);
@@ -204,19 +213,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (mList.size()==1){
-                    Toast.makeText(MainActivity.this, "城市列表不能为空",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "常用城市列表不能为空",Toast.LENGTH_SHORT).show();
                     return true;
                 }
+                mPosition = i;//记录删除的标志位置
                 showDialog();//跳出确认删除对话框
-                if (mIsDelete){
-                    deleteCity(i);
-                }
                 return true;
             }
         });
     }
-
-
 
     /**
      * 展示一个对话框
@@ -229,13 +234,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         alertDialog.setPositiveButton("是", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                mIsDelete = true ;//确认删除标志
+                deleteCity();//将城市在列表中移除
             }
         });
         alertDialog.setNegativeButton("否", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                mIsDelete = false ;//拒绝删除标志
+
             }
         });
         alertDialog.show();
@@ -244,20 +249,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     /**
      * 对常用城市进行删除
      */
-    private void deleteCity(int i){
-        mWeatherDbOpenHelper.deleteCommonCity(MainActivity.this ,mList.get(i));
-        mWeatherDbOpenHelper.deleteWeather(mList.get(i));//删除城市时，删除该数据库中的天气信息
-        mList.remove(i);
+    private void deleteCity(){
+        mWeatherDbOpenHelper.deleteCommonCity(MainActivity.this ,mList.get(mPosition));
+        mWeatherDbOpenHelper.deleteWeather(mList.get(mPosition));//删除城市时，删除该数据库中的天气信息
+        mList.remove(mPosition);
         mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
         if (mList.size()<mFragments.size()) {
-            mFragments.remove(i);
+            mFragments.remove(mPosition);
             fragmentAdapter.notifyDataSetChanged();
         }
         mDrawerLayout.closeDrawers();
     }
 
     /**
-     * 转换UTF-8格式
+     * 将中文转换为UTF-8格式
      */
     private String transform(String formmer){
         try {
@@ -310,8 +315,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     /**
      * 初始化各种控件
      */
-    private void initializeView(String cityName){
-        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
+    private void initializeView(){
         mWeatherDbOpenHelper = new WeatherDbOpenHelper(this);
         mBtChooseCity = (Button) findViewById(R.id.weather_bt_switch);
         mBtRefresh = (Button) findViewById(R.id.weather_bt_refresh);
@@ -319,6 +323,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mBtExit = (Button) findViewById(R.id.weather_bt_exit);
         mLvCity = (ListView) findViewById(R.id.show_lv_city);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.weather_ll_background);
+        mViewPager = (ViewPager) findViewById(R.id.weather_vp_view);
+    }
+
+    /**
+     * 处理碎片以及常用城市列表
+     */
+    private void handleFragment(String cityName){
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
         mList = mWeatherDbOpenHelper.loadCommonCity(MainActivity.this);//加载所有常用城市到容器中
         mCityAdapter = new CityAdapter(this , mList);
         mLvCity.setAdapter(mCityAdapter);
@@ -332,7 +344,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
         mFragments.add(mFirstCity);
         restore();//恢复用户之前添加的城市视图
-        mViewPager = (ViewPager) findViewById(R.id.weather_vp_view);
+        mViewPager.setOffscreenPageLimit(3);//设置缓存数量
         fragmentAdapter = new FragmentAdapter(getSupportFragmentManager() , mFragments);
         mViewPager.setAdapter(fragmentAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -347,19 +359,16 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     case 0:
                         mCityFlag = mList.get(position);//每次滑动到该页面时，记录下当前页面的城市名字
                         showWeather();//并且根据天气种类切换背景
-                        Log.d("test","更新第一张");
                         break;
                     case 1 :
                         mCityFlag = mList.get(position);
                         showWeather();
                         mSecondCity.loadData();
-                        Log.d("test","更新第二张");
                         break;
                     case 2:
                         mCityFlag = mList.get(position);
                         showWeather();
                         mThirdCity.loadData();
-                        Log.d("test","更新第3张");
                         break;
                     case 3:
                         mCityFlag = mList.get(position);
@@ -375,7 +384,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             }
         });
     }
-
 
     /**
      * 改变天气背景并开启更新服务
@@ -430,6 +438,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             public void succeed(String result , String city , boolean mflag ) {
                 boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDbOpenHelper , result , city , mflag);
                 if (flag){
+                    if (!mIsFromChooseActivity){
+                        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;//获取存储主城市文件的引用
+                        mCityFlag = preferences.getString("city","");
+                        mFirstCity.loadData();
+                    }
                     showWeather();
                 }else {
                     Toast.makeText(MainActivity.this, "数据解析失败...", Toast.LENGTH_SHORT).show();

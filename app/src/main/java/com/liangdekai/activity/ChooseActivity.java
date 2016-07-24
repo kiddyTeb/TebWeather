@@ -43,29 +43,26 @@ public class ChooseActivity extends Activity {
     private SearchView mSvSearch;
     private String mLevel;
     private String mSelected;
-    private String mSelectedProvinceName;
-    private boolean mFromWeatherActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE);
-        mFromWeatherActivity = getIntent().getBooleanExtra("fromWeatherActivity",false);//判断是否从展示天气界面处跳转而来
-        mSelected = preferences.getString("city","");//获取文件中的城市名称，若没有，视为首次进行选择操作
-        if(!mFromWeatherActivity && !mSelected.equals("")){//不从天气展示页面处跳转而来并且也有选择城市，则直接跳转到天气展示界面
-            Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
-            intent.putExtra("backFromChooseActivity",true);//设置非第一次操作的标识
-            startActivity(intent);
-            finish();
-            return;
-        }
+        jumpToWeather();//判断是否直接跳转
         requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏标题栏
-        setContentView(R.layout.activity_choose);
-        initView();
+        setContentView(R.layout.activity_choose);//加载布局
+        initView();//初始化控件
+        setAllListener();//设置各种事件监听
+        searchProvince();//查询省份
+    }
+
+    /**
+     * 设置控件的事件监听
+     */
+    private void setAllListener(){
         mLvShowCity.setOnItemClickListener(new AdapterView.OnItemClickListener() {//设置ListView事件监听
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    judgeClickItem(position);
+                judgeClickItem(position);
             }
         });
         mSvSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {//设置搜索事件监听
@@ -106,7 +103,22 @@ public class ChooseActivity extends Activity {
                 });
             }
         });
-        searchProvince();//查询省份
+    }
+
+    /**
+     * 判断是否为第一次操作，进行判断是否直接跳转到天气界面逻辑
+     */
+    private void jumpToWeather(){
+        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE);
+        boolean mFromWeatherActivity = getIntent().getBooleanExtra("fromWeatherActivity", false);
+        mSelected = preferences.getString("city","");//获取文件中的城市名称，若没有，视为首次进行选择操作
+        if(!mFromWeatherActivity && !mSelected.equals("")){//不从天气展示页面处跳转而来并且也有选择城市，则直接跳转到天气展示界面
+            Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
+            intent.putExtra("backFromChooseActivity",true);//设置非第一次操作的标识
+            startActivity(intent);
+            finish();
+            return;
+        }
     }
 
     /**
@@ -123,9 +135,9 @@ public class ChooseActivity extends Activity {
             mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
             mLvShowCity.setSelection(0);//将数据定位到第一行
             mLevel = "province";//设置当前状态为省份查询
-        } else {//则发送请求获取
+        } else {
             if (NetWorkUtil.hasNetWork()){
-                searchByInternet();
+                searchByInternet();//发送请求获取
             }
             else{
                 Toast.makeText(ChooseActivity.this ,"请检查网络是否开启" ,Toast.LENGTH_SHORT).show() ;
@@ -173,7 +185,7 @@ public class ChooseActivity extends Activity {
      */
     private void judgeClickItem(int position){
         if (mLevel.equals("province")) {
-            mSelectedProvinceName = mProvinceNameList.get(position);//若点击相应省份，则显示相应城市
+            String mSelectedProvinceName = mProvinceNameList.get(position);
             searchCity(mSelectedProvinceName);
         } else if (mLevel.equals("city")) {
             if (mSelected.equals("")) {
@@ -231,7 +243,7 @@ public class ChooseActivity extends Activity {
 
 
     /**
-     * 发送请求，处理返回结果
+     * 发送请求，处理返回结果并进行保存
      */
     private void searchByInternet() {
         String address = "http://v.juhe.cn/weather/citys?key=5b34e560321fd5f86680b4deb1e30ad8";
@@ -240,7 +252,6 @@ public class ChooseActivity extends Activity {
             public void succeed(String result, String empty, boolean mflag) {
                 if (result != null){
                     boolean flag = false;
-                    //flag = HandleResponseUtil.handleCityResponse(mWeatherDbOpenHelper,result);
                     flag = HandleResponseUtil.praseCityResponse(mWeatherDbOpenHelper , result);
                     if (flag){
                         searchProvince();//查询省份
@@ -266,13 +277,9 @@ public class ChooseActivity extends Activity {
     public void onBackPressed() {
         if(mLevel.equals("city")){
             searchProvince();
-        }else if(mFromWeatherActivity){
-            finish();
         }else {
             finish();
         }
-
     }
-
 }
 

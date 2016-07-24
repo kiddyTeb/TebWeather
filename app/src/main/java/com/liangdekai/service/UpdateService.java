@@ -63,6 +63,9 @@ public class UpdateService extends Service{
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /**
+     * 更新天气数据
+     */
     public void updateWeather(){
         SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
         String cityName = preferences.getString("city","");//获取文件中已选择城市的名字

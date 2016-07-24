@@ -8,7 +8,7 @@ import android.net.NetworkInfo;
 import com.liangdekai.MyApplication;
 
 /**
- * Created by asus on 2016/7/15.
+ * 检测网络是否可用
  */
 public class NetWorkUtil {
     public static boolean hasNetWork(){
