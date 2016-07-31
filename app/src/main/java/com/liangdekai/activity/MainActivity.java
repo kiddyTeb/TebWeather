@@ -17,6 +17,7 @@ import com.liangdekai.Fragment.MainCity;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.adapter.FragmentAdapter;
 import com.liangdekai.db.WeatherDB;
+import com.liangdekai.service.UpdateService;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
@@ -81,8 +82,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 showWeather();//展示天气背景
             }else if (NetWorkUtil.hasNetWork()){
                 String cityName = getIntent().getStringExtra("cityId");//获取用户选取的城市
-                //mList.add(cityName);//存储用户选择的城市
-                //mCityAdapter.notifyDataSetChanged();//通知列表发生变化,强制调用getView来刷新每个Item的
                 sendResquest(cityName);//根据城市名称发送请求
             } else {
                 Toast.makeText(MainActivity.this , "网络连接异常，请检查网络" , Toast.LENGTH_LONG).show();
@@ -393,8 +392,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     public void showWeather(){
         SharedPreferences preferences = getSharedPreferences(mCityFlag , MODE_PRIVATE) ;
         changeBackground(mDrawerLayout,preferences.getString("weather",""));
-        /*Intent intent = new Intent(MainActivity.this, UpdateService.class);
-        startService(intent);//启动更新数据服务*/
+        Intent intent = new Intent(MainActivity.this, UpdateService.class);
+        intent.putExtra("city" , mList.get(0));
+        startService(intent);//启动更新数据服务
     }
 
     /**

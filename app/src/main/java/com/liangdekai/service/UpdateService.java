@@ -25,6 +25,7 @@ import java.net.URLEncoder;
  * 创建一个更新天气信息的服务
  */
 public class UpdateService extends Service{
+    private String mCityName;
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -32,13 +33,14 @@ public class UpdateService extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mCityName = intent.getStringExtra("city");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 updateWeather();//开启线程去更新天气信息
             }
         }).start();
-        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
+        SharedPreferences preferences = getSharedPreferences(mCityName, MODE_PRIVATE) ;
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.putExtra("backFromChooseActivity",true);//设置标识
         PendingIntent pendingIntend = PendingIntent.getActivity(this,0,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);//实现点击效果
@@ -67,7 +69,7 @@ public class UpdateService extends Service{
      * 更新天气数据
      */
     public void updateWeather(){
-        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
+        SharedPreferences preferences = getSharedPreferences(mCityName, MODE_PRIVATE) ;
         String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
         try {
             String cityNameUTF = URLEncoder.encode(cityName,"UTF-8");//进行UPL编码
@@ -76,7 +78,7 @@ public class UpdateService extends Service{
                 @Override
                 public void succeed(String result ,String city) {
                     WeatherDB weatherDB = WeatherDB.getInstance(UpdateService.this);
-                    SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
+                    SharedPreferences preferences = getSharedPreferences(mCityName , MODE_PRIVATE) ;
                     String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
                     HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDB , result , cityName);
                 }
