@@ -171,13 +171,9 @@ public class WeatherDB  {
      * @param context
      * @param todayInfo
      */
-    public void saveWeather(Context context, TodayInfo todayInfo , boolean flag) {
+    public void saveWeather(Context context, TodayInfo todayInfo) {
         SharedPreferences.Editor editor ;
-        if (flag){//根据需要选择存储文件位置
-            editor = context.getSharedPreferences(todayInfo.getCity() , Context.MODE_PRIVATE).edit();
-        }else {
-            editor = context.getSharedPreferences("data" , Context.MODE_PRIVATE).edit();
-        }
+        editor = context.getSharedPreferences(todayInfo.getCity() , Context.MODE_PRIVATE).edit();
         editor.putString("city", todayInfo.getCity());
         editor.putString("time",todayInfo.getWeek());
         editor.putString("date_y", todayInfo.getDate());

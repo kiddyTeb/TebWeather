@@ -74,11 +74,11 @@ public class UpdateService extends Service{
             String address = "http://v.juhe.cn/weather/index?cityname="+cityNameUTF+"&dtype=&format=2&key=5b34e560321fd5f86680b4deb1e30ad8";
             new RequestAsyncTask(new RequestAsyncTask.RequestListener() {
                 @Override
-                public void succeed(String result ,String city , boolean flag) {
+                public void succeed(String result ,String city) {
                     WeatherDB weatherDB = WeatherDB.getInstance(UpdateService.this);
                     SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE) ;
                     String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
-                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDB , result , cityName ,false);
+                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDB , result , cityName);
                 }
 
                 @Override

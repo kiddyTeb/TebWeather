@@ -14,18 +14,16 @@ public class RequestAsyncTask extends AsyncTask<String , Void , String >{
     private RequestListener mRequestListener;
     private ShowDialog mShowDialog = null;
     private String mCity ;
-    private boolean flag ;
 
     public interface RequestListener {
-        void succeed(String result , String city , boolean flag );
+        void succeed(String result , String city);
         void failed();
     }
 
-    public RequestAsyncTask(FragmentManager fragmentManager , RequestListener requestListener , String city , boolean flag ){
+    public RequestAsyncTask(FragmentManager fragmentManager , RequestListener requestListener , String city ){
         this.mFragmentManager = fragmentManager;
         this.mRequestListener = requestListener;
         this.mCity = city;
-        this.flag = flag ;
     }
 
     public RequestAsyncTask(RequestListener requestListener){
@@ -48,7 +46,7 @@ public class RequestAsyncTask extends AsyncTask<String , Void , String >{
     @Override
     protected void onPostExecute(String result) {
         if (result != null){
-            mRequestListener.succeed(result , mCity , flag );
+            mRequestListener.succeed(result , mCity);
         }else{
             mRequestListener.failed();
         }

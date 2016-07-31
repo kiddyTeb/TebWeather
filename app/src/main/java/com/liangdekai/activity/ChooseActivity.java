@@ -47,10 +47,10 @@ public class ChooseActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        jumpToWeather();//判断是否直接跳转
         requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏标题栏
         setContentView(R.layout.activity_choose);//加载布局
         initView();//初始化控件
+        jumpToWeather();//判断是否直接跳转
         setAllListener();//设置各种事件监听
         searchProvince();//查询省份
     }
@@ -109,9 +109,12 @@ public class ChooseActivity extends Activity {
      * 判断是否为第一次操作，进行判断是否直接跳转到天气界面逻辑
      */
     private void jumpToWeather(){
-        SharedPreferences preferences = getSharedPreferences("data" , MODE_PRIVATE);
+        List<String> temp = mWeatherDB.loadCommonCity(this);
+        mSelected = "" ;
+        if (temp.size() > 0){
+            mSelected = temp.get(0);
+        }
         boolean mFromWeatherActivity = getIntent().getBooleanExtra("fromWeatherActivity", false);
-        mSelected = preferences.getString("city","");//获取文件中的城市名称，若没有，视为首次进行选择操作
         if(!mFromWeatherActivity && !mSelected.equals("")){//不从天气展示页面处跳转而来并且也有选择城市，则直接跳转到天气展示界面
             Intent intent = new Intent(ChooseActivity.this,MainActivity.class);
             intent.putExtra("backFromChooseActivity",true);//设置非第一次操作的标识
@@ -249,7 +252,7 @@ public class ChooseActivity extends Activity {
         String address = "http://v.juhe.cn/weather/citys?key=5b34e560321fd5f86680b4deb1e30ad8";
         RequestAsyncTask requestAsyncTask = new RequestAsyncTask(getFragmentManager(), new RequestAsyncTask.RequestListener() {
             @Override
-            public void succeed(String result, String empty, boolean mflag) {
+            public void succeed(String result, String empty) {
                 if (result != null){
                     boolean flag = false;
                     flag = HandleResponseUtil.praseCityResponse(mWeatherDB , result);
@@ -265,7 +268,7 @@ public class ChooseActivity extends Activity {
             public void failed() {
                 Toast.makeText(ChooseActivity.this, "网络请求失败...", Toast.LENGTH_SHORT).show();
             }
-        },"" , false);
+        },"" );
         requestAsyncTask.execute(address);
     }
 

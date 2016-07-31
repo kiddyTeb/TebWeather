@@ -18,9 +18,6 @@ import com.liangdekai.weather_liangdekai.R;
 
 import java.util.List;
 
-/**
- * Created by asus on 2016/7/21.
- */
 public class MainCity extends Fragment {
     private TextView mTvCity;
     private TextView mTvPublishTime;
@@ -103,7 +100,7 @@ public class MainCity extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        SharedPreferences preferences = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE) ;
+        SharedPreferences preferences = getActivity().getSharedPreferences(mCityName, Context.MODE_PRIVATE) ;
         if (!"".equals(preferences.getString("city","")) ){
             loadData();
         }
@@ -176,7 +173,7 @@ public class MainCity extends Fragment {
 
     public void loadData(){
         List<FutureWeatherInfo> weatherList = mWeatherDB.loadFutureWeather(mCityName);
-        SharedPreferences preferences = getActivity().getSharedPreferences("data" , Context.MODE_PRIVATE) ;
+        SharedPreferences preferences = getActivity().getSharedPreferences(mCityName , Context.MODE_PRIVATE) ;
         mTvCity.setText(preferences.getString("city",""));//对各种组件进行设置值
         mTvPublishTime.setText(preferences.getString("time",""));
         mTvDate.setText(preferences.getString("date_y",""));

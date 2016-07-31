@@ -48,12 +48,12 @@ public class HandleResponseUtil {
      * @param result
      * @return boolean
      */
-    public static boolean praseWeatherResponse(Context context , WeatherDB weatherDB , String result , String city , boolean flag){
+    public static boolean praseWeatherResponse(Context context , WeatherDB weatherDB , String result , String city){
         Gson gson = new Gson();
         JsonWeather jsonWeather = gson.fromJson(result , JsonWeather.class);
         WeatherInfo weatherInfo = jsonWeather.getWeatherInfo();
         TodayInfo todayInfo = weatherInfo.getTodayInfo();
-        weatherDB.saveWeather(context , todayInfo , flag);
+        weatherDB.saveWeather(context , todayInfo);
 
         List<FutureWeatherInfo> futureWeatherInfoList = weatherInfo.getFutureWeatherInfoList();
         List<FutureWeatherInfo> futureWeatherList = new ArrayList<FutureWeatherInfo>();
