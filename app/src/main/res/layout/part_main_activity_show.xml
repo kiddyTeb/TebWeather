@@ -92,7 +92,7 @@
                         android:text="@string/dress"
                         android:textSize="22sp"/>
                     <TextView
-                        android:id="@+id/weather_tv_howdress"
+                        android:id="@+id/weather_tv_how_dress"
                         android:layout_width="100dp"
                         android:layout_height="40dp"
                         android:textSize="24sp"
@@ -119,7 +119,7 @@
                         android:text="@string/travel"
                         android:textSize="22sp"/>
                     <TextView
-                        android:id="@+id/weather_tv_howtravel"
+                        android:id="@+id/weather_tv_how_travel"
                         android:layout_width="100dp"
                         android:layout_height="40dp"
                         android:textSize="24sp"
@@ -151,7 +151,7 @@
                         android:text="@string/sport"
                         android:textSize="22sp"/>
                     <TextView
-                        android:id="@+id/weather_tv_howsport"
+                        android:id="@+id/weather_tv_how_sport"
                         android:layout_width="100dp"
                         android:layout_height="40dp"
                         android:textSize="24sp"
@@ -177,7 +177,7 @@
                         android:text="@string/ray"
                         android:textSize="18sp"/>
                     <TextView
-                        android:id="@+id/weather_tv_howray"
+                        android:id="@+id/weather_tv_how_ray"
                         android:layout_width="100dp"
                         android:layout_height="40dp"
                         android:textSize="24sp"
@@ -216,7 +216,7 @@
                     android:textSize="26sp"/>
             </LinearLayout>
 
-            <include layout="@layout/activity_future"/>
+            <include layout="@layout/part_main_activity_future"/>
 
         </RelativeLayout>
     </ScrollView>

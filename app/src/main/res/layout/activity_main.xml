@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         >
-        <include layout="@layout/activity_titlt"/>
+        <include layout="@layout/part_main_activity_titlt"/>
 
         <android.support.v4.view.ViewPager
             android:id="@+id/weather_vp_view"
@@ -18,7 +18,7 @@
             android:layout_weight="1"
             >
 
-            <include layout="@layout/fragment_show"/>
+            <include layout="@layout/part_main_activity_show"/>
 
         </android.support.v4.view.ViewPager>
 

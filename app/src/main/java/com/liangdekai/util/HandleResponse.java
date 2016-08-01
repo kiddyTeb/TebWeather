@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 对JSON格式数据进行解析，并将结果进行保存
  */
-public class HandleResponseUtil {
+public class HandleResponse {
     /**
      * 对城市的JSON数据进行解析保存
      * @param weatherDB

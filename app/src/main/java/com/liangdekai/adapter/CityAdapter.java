@@ -60,10 +60,10 @@ public class CityAdapter extends BaseAdapter {
         View view;
         ViewHolder viewHolder;
         if (convertView == null) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.adapter_city, null);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_lv_city, null);
             viewHolder = new ViewHolder();
             viewHolder.imageView = (ImageView) view.findViewById(R.id.adapter_iv_image);
-            viewHolder.textView = (TextView) view.findViewById(R.id.adapter_tv_cityName);
+            viewHolder.textView = (TextView) view.findViewById(R.id.adapter_tv_city_name);
             view.setTag(viewHolder);//把HolderView对象存储在View中
         }else {
             view = convertView;

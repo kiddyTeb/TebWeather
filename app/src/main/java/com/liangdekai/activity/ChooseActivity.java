@@ -2,7 +2,6 @@ package com.liangdekai.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,7 +20,7 @@ import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.LocationUtil;
 import com.liangdekai.weather_liangdekai.R;
-import com.liangdekai.util.HandleResponseUtil;
+import com.liangdekai.util.HandleResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -255,7 +254,7 @@ public class ChooseActivity extends Activity {
             public void succeed(String result, String empty) {
                 if (result != null){
                     boolean flag = false;
-                    flag = HandleResponseUtil.praseCityResponse(mWeatherDB , result);
+                    flag = HandleResponse.praseCityResponse(mWeatherDB , result);
                     if (flag){
                         searchProvince();//查询省份
                     }

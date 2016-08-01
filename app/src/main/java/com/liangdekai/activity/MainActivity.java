@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.liangdekai.Fragment.MainCity;
+import com.liangdekai.Fragment.CitySelected;
 import com.liangdekai.adapter.CityAdapter;
 import com.liangdekai.adapter.FragmentAdapter;
 import com.liangdekai.db.WeatherDB;
@@ -21,7 +21,7 @@ import com.liangdekai.service.UpdateService;
 import com.liangdekai.util.NetWorkUtil;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
-import com.liangdekai.util.HandleResponseUtil;
+import com.liangdekai.util.HandleResponse;
 
 import java.io.UnsupportedEncodingException;
 import android.app.AlertDialog;
@@ -46,10 +46,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private WeatherDB mWeatherDB;
     private FragmentAdapter fragmentAdapter;
     private List<Fragment> mFragments = new ArrayList<Fragment>();
-    private MainCity mFirstCity;
-    private MainCity mSecondCity;
-    private MainCity mThirdCity;
-    private MainCity mForthCity;
+    private CitySelected mFirstCity;
+    private CitySelected mSecondCity;
+    private CitySelected mThirdCity;
+    private CitySelected mForthCity;
     private ViewPager mViewPager;
     private CityAdapter mCityAdapter;
     private ListView mLvCity;
@@ -62,7 +62,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);//取消标题栏
-        setContentView(R.layout.draw_main);//加载布局
+        setContentView(R.layout.activity_main);//加载布局
         mIsFromChooseActivity = getIntent().getBooleanExtra("backFromChooseActivity",false);//判断是否通过BACK返回到此界面,或者是否已经选择城市跳过选择界面
         initializeView();//初始化控件
         handleFragment(getIntent().getStringExtra("cityId"));//处理碎片以及常用城市列表
@@ -108,15 +108,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                             case 0:
                                 break;
                             case 1:
-                                mSecondCity = MainCity.newInstance(cityName);
+                                mSecondCity = CitySelected.newInstance(cityName);
                                 mFragments.add(mSecondCity);
                                 break;
                             case 2:
-                                mThirdCity = MainCity.newInstance(cityName);
+                                mThirdCity = CitySelected.newInstance(cityName);
                                 mFragments.add(mThirdCity);
                                 break;
                             case 3:
-                                mForthCity = MainCity.newInstance(cityName);
+                                mForthCity = CitySelected.newInstance(cityName);
                                 mFragments.add(mForthCity);
                                 break;
                             default:
@@ -291,21 +291,21 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private void restore(){
         switch (mList.size()){
             case 4:
-                mSecondCity = MainCity.newInstance(mList.get(1));
+                mSecondCity = CitySelected.newInstance(mList.get(1));
                 mFragments.add(mSecondCity);
-                mThirdCity = MainCity.newInstance(mList.get(2));
+                mThirdCity = CitySelected.newInstance(mList.get(2));
                 mFragments.add(mThirdCity);
-                mForthCity = MainCity.newInstance(mList.get(3));
+                mForthCity = CitySelected.newInstance(mList.get(3));
                 mFragments.add(mForthCity);
                 break;
             case 3:
-                mSecondCity = MainCity.newInstance(mList.get(1));
+                mSecondCity = CitySelected.newInstance(mList.get(1));
                 mFragments.add(mSecondCity);
-                mThirdCity = MainCity.newInstance(mList.get(2));
+                mThirdCity = CitySelected.newInstance(mList.get(2));
                 mFragments.add(mThirdCity);
                 break;
             case 2:
-                mSecondCity = MainCity.newInstance(mList.get(1));
+                mSecondCity = CitySelected.newInstance(mList.get(1));
                 mFragments.add(mSecondCity);
                 break;
             case 1:
@@ -332,11 +332,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private void handleFragment(String cityName){
         if (!mIsFromChooseActivity){
-            mFirstCity = MainCity.newInstance(cityName);
+            mFirstCity = CitySelected.newInstance(cityName);
             mWeatherDB.saveCommonCity(this , cityName);
         }else {
             SharedPreferences preferences = getSharedPreferences(mWeatherDB.loadCommonCity(MainActivity.this).get(0) , MODE_PRIVATE) ;//获取存储主城市文件的引用
-            mFirstCity = MainCity.newInstance(preferences.getString("city",""));
+            mFirstCity = CitySelected.newInstance(preferences.getString("city",""));
         }
         mList = mWeatherDB.loadCommonCity(MainActivity.this);//加载所有常用城市到容器中
         mCityAdapter = new CityAdapter(this , mList);
@@ -408,7 +408,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             @Override
             public void succeed(String result , String city) {
                 Log.d("test",result);
-                boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDB , result , city);
+                boolean flag = HandleResponse.praseWeatherResponse(MainActivity.this , mWeatherDB , result , city);
                 if (flag){
                     if (!mIsFromChooseActivity){
                         SharedPreferences preferences = getSharedPreferences(mList.get(0), MODE_PRIVATE) ;//获取存储主城市文件的引用
@@ -439,7 +439,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         new RequestAsyncTask(getFragmentManager(), new RequestAsyncTask.RequestListener() {
             @Override
             public void succeed(String result , String city) {
-                boolean flag = HandleResponseUtil.praseWeatherResponse(MainActivity.this , mWeatherDB , result , city );
+                boolean flag = HandleResponse.praseWeatherResponse(MainActivity.this , mWeatherDB , result , city );
                 if (flag){
                     if (!mIsFromChooseActivity){
                         SharedPreferences preferences = getSharedPreferences(mList.get(0) , MODE_PRIVATE) ;//获取存储主城市文件的引用

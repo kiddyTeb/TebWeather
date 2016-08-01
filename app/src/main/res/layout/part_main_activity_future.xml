@@ -15,7 +15,7 @@
             android:layout_width="60dp"
             android:layout_height="match_parent">
             <TextView
-                android:id="@+id/weather_tv_dayOne"
+                android:id="@+id/weather_tv_day_one"
                 android:layout_width="55dp"
                 android:layout_height="28dp"
                 android:layout_marginStart="5dp"
@@ -28,21 +28,21 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="10dp"/>
             <TextView
-                android:id="@+id/weather_tv_futureWeatherOne"
+                android:id="@+id/weather_tv_future_weather_one"
                 android:layout_width="60dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureTempOne"
+                android:id="@+id/weather_tv_future_temp_one"
                 android:layout_width="60dp"
                 android:layout_height="24dp"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureWindOne"
+                android:id="@+id/weather_tv_future_wind_one"
                 android:layout_width="65dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
@@ -56,7 +56,7 @@
             android:layout_width="60dp"
             android:layout_height="match_parent">
             <TextView
-                android:id="@+id/weather_tv_dayTwo"
+                android:id="@+id/weather_tv_day_two"
                 android:layout_width="55dp"
                 android:layout_height="28dp"
                 android:layout_marginTop="8dp"
@@ -69,21 +69,21 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="10dp" />
             <TextView
-                android:id="@+id/weather_tv_futureWeatherTwo"
+                android:id="@+id/weather_tv_future_weather_two"
                 android:layout_width="60dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureTempTwo"
+                android:id="@+id/weather_tv_future_temp_two"
                 android:layout_width="60dp"
                 android:layout_height="24dp"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureWindTwo"
+                android:id="@+id/weather_tv_future_wind_two"
                 android:layout_width="65dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
@@ -97,7 +97,7 @@
             android:layout_width="60dp"
             android:layout_height="match_parent">
             <TextView
-                android:id="@+id/weather_tv_dayThree"
+                android:id="@+id/weather_tv_day_three"
                 android:layout_width="55dp"
                 android:layout_height="28dp"
                 android:layout_marginStart="5dp"
@@ -110,21 +110,21 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="10dp"/>
             <TextView
-                android:id="@+id/weather_tv_futureWeatherThree"
+                android:id="@+id/weather_tv_future_weather_three"
                 android:layout_width="60dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureTempThree"
+                android:id="@+id/weather_tv_future_temp_three"
                 android:layout_width="60dp"
                 android:layout_height="24dp"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureWindThree"
+                android:id="@+id/weather_tv_future_wind_three"
                 android:layout_width="65dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
@@ -138,7 +138,7 @@
             android:layout_width="60dp"
             android:layout_height="match_parent">
             <TextView
-                android:id="@+id/weather_tv_dayForth"
+                android:id="@+id/weather_tv_day_forth"
                 android:layout_width="55dp"
                 android:layout_height="28dp"
                 android:layout_marginStart="5dp"
@@ -151,21 +151,21 @@
                 android:layout_height="32dp"
                 android:layout_marginLeft="10dp" />
             <TextView
-                android:id="@+id/weather_tv_futureWeatherForth"
+                android:id="@+id/weather_tv_future_weather_forth"
                 android:layout_width="60dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureTempForth"
+                android:id="@+id/weather_tv_future_temp_forth"
                 android:layout_width="60dp"
                 android:layout_height="24dp"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureWindForth"
+                android:id="@+id/weather_tv_future_wind_forth"
                 android:layout_width="65dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
@@ -179,7 +179,7 @@
             android:layout_width="60dp"
             android:layout_height="match_parent">
             <TextView
-                android:id="@+id/weather_tv_dayFifth"
+                android:id="@+id/weather_tv_day_fifth"
                 android:layout_width="55dp"
                 android:layout_height="28dp"
                 android:layout_marginStart="5dp"
@@ -192,21 +192,21 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="10dp" />
             <TextView
-                android:id="@+id/weather_tv_futureWeatherFifth"
+                android:id="@+id/weather_tv_future_weather_fifth"
                 android:layout_width="60dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureTempFifth"
+                android:id="@+id/weather_tv_future_temp_fifth"
                 android:layout_width="60dp"
                 android:layout_height="24dp"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureWindFifth"
+                android:id="@+id/weather_tv_future_wind_fifth"
                 android:layout_width="65dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
@@ -220,7 +220,7 @@
             android:layout_width="60dp"
             android:layout_height="match_parent">
             <TextView
-                android:id="@+id/weather_tv_daySix"
+                android:id="@+id/weather_tv_day_six"
                 android:layout_width="55dp"
                 android:layout_height="28dp"
                 android:layout_marginStart="5dp"
@@ -233,21 +233,21 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="10dp" />
             <TextView
-                android:id="@+id/weather_tv_futureWeatherSix"
+                android:id="@+id/weather_tv_future_weather_six"
                 android:layout_width="60dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureTempSix"
+                android:id="@+id/weather_tv_future_temp_six"
                 android:layout_width="60dp"
                 android:layout_height="24dp"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/weather_tv_futureWindSix"
+                android:id="@+id/weather_tv_future_wind_six"
                 android:layout_width="65dp"
                 android:layout_height="28dp"
                 android:textSize="10sp"

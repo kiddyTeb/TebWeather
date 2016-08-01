@@ -14,7 +14,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.liangdekai.activity.MainActivity;
 import com.liangdekai.db.WeatherDB;
-import com.liangdekai.util.HandleResponseUtil;
+import com.liangdekai.util.HandleResponse;
 import com.liangdekai.util.RequestAsyncTask;
 import com.liangdekai.weather_liangdekai.R;
 
@@ -25,6 +25,7 @@ import java.net.URLEncoder;
  * 创建一个更新天气信息的服务
  */
 public class UpdateService extends Service{
+    private static final int SLEEP_TIME = 6*1000*60*60 ;
     private String mCityName;
     @Override
     public IBinder onBind(Intent intent) {
@@ -57,8 +58,8 @@ public class UpdateService extends Service{
 
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);//获取一个AlarmManager实例
-        int sixHour = 6 * 60 * 60 * 1000;//设置定时为6小时的任务
-        long sleepTime = SystemClock.elapsedRealtime()+sixHour;//获取系统开机到现在所经历的毫秒数
+        //设置定时为6小时的任务
+        long sleepTime = SystemClock.elapsedRealtime()+SLEEP_TIME;//获取系统开机到现在所经历的毫秒数
         Intent intented = new Intent(this , UpdateService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this,0,intented,0);//获取一个能够执行广播的PendingIntent
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,sleepTime,pendingIntent);//设置定时任务
@@ -80,7 +81,7 @@ public class UpdateService extends Service{
                     WeatherDB weatherDB = WeatherDB.getInstance(UpdateService.this);
                     SharedPreferences preferences = getSharedPreferences(mCityName , MODE_PRIVATE) ;
                     String cityName = preferences.getString("city","");//获取文件中已选择城市的名字
-                    HandleResponseUtil.praseWeatherResponse(UpdateService.this , weatherDB , result , cityName);
+                    HandleResponse.praseWeatherResponse(UpdateService.this , weatherDB , result , cityName);
                 }
 
                 @Override

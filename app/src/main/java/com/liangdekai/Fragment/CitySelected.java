@@ -18,7 +18,7 @@ import com.liangdekai.weather_liangdekai.R;
 
 import java.util.List;
 
-public class MainCity extends Fragment {
+public class CitySelected extends Fragment {
     private TextView mTvCity;
     private TextView mTvPublishTime;
     private TextView mTvDate;
@@ -67,7 +67,7 @@ public class MainCity extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater,  ViewGroup container,  Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_show , container , false);
+        view = inflater.inflate(R.layout.part_main_activity_show, container , false);
         initView();
         Bundle bundle = this.getArguments();
         if (bundle != null){
@@ -76,12 +76,12 @@ public class MainCity extends Fragment {
         return view;
     }
 
-    public static MainCity newInstance(String cityName){
-        MainCity mainCity = new MainCity();
+    public static CitySelected newInstance(String cityName){
+        CitySelected citySelected = new CitySelected();
         Bundle bundle = new Bundle();
         bundle.putString("cityName",cityName);
-        mainCity.setArguments(bundle);
-        return mainCity;
+        citySelected.setArguments(bundle);
+        return citySelected;
     }
 
     @Override
@@ -131,42 +131,42 @@ public class MainCity extends Fragment {
         mTvWind = (TextView) view.findViewById(R.id.weather_tv_wind);
         mTvTemperature = (TextView) view.findViewById(R.id.weather_tv_temperature);
         mTvWeather = (TextView) view.findViewById(R.id.weather_tv_weather);
-        mTvDress = (TextView) view.findViewById(R.id.weather_tv_howdress);
-        mTvTravel = (TextView) view.findViewById(R.id.weather_tv_howtravel);
-        mTvSport = (TextView) view.findViewById(R.id.weather_tv_howsport);
-        mTvUv = (TextView) view.findViewById(R.id.weather_tv_howray);
+        mTvDress = (TextView) view.findViewById(R.id.weather_tv_how_dress);
+        mTvTravel = (TextView) view.findViewById(R.id.weather_tv_how_travel);
+        mTvSport = (TextView) view.findViewById(R.id.weather_tv_how_sport);
+        mTvUv = (TextView) view.findViewById(R.id.weather_tv_how_ray);
         mTvAdvice = (TextView) view.findViewById(R.id.weather_tv_suggestion);
 
-        mTvFutureDayOne = (TextView) view.findViewById(R.id.weather_tv_dayOne);//初始化未来六日天气信息所需的控件
+        mTvFutureDayOne = (TextView) view.findViewById(R.id.weather_tv_day_one);//初始化未来六日天气信息所需的控件
         mIvFutureImageOne = (ImageView) view.findViewById(R.id.weather_iv_first);
-        mTvFutureWeatherOne = (TextView) view.findViewById(R.id.weather_tv_futureWeatherOne);
-        mTvFutureTempOne = (TextView) view.findViewById(R.id.weather_tv_futureTempOne);
-        mTvFutureWindOne = (TextView) view.findViewById(R.id.weather_tv_futureWindOne);
-        mTvFutureDayTwo = (TextView) view.findViewById(R.id.weather_tv_dayTwo);
+        mTvFutureWeatherOne = (TextView) view.findViewById(R.id.weather_tv_future_weather_one);
+        mTvFutureTempOne = (TextView) view.findViewById(R.id.weather_tv_future_temp_one);
+        mTvFutureWindOne = (TextView) view.findViewById(R.id.weather_tv_future_wind_one);
+        mTvFutureDayTwo = (TextView) view.findViewById(R.id.weather_tv_day_two);
         mIvFutureImageTwo = (ImageView) view.findViewById(R.id.weather_iv_second);
-        mTvFutureWeatherTwo = (TextView) view.findViewById(R.id.weather_tv_futureWeatherTwo);
-        mTvFutureTempTwo = (TextView) view.findViewById(R.id.weather_tv_futureTempTwo);
-        mTvFutureWindTwo = (TextView) view.findViewById(R.id.weather_tv_futureWindTwo);
-        mTvFutureDayThree = (TextView) view.findViewById(R.id.weather_tv_dayThree);
+        mTvFutureWeatherTwo = (TextView) view.findViewById(R.id.weather_tv_future_weather_two);
+        mTvFutureTempTwo = (TextView) view.findViewById(R.id.weather_tv_future_temp_two);
+        mTvFutureWindTwo = (TextView) view.findViewById(R.id.weather_tv_future_wind_two);
+        mTvFutureDayThree = (TextView) view.findViewById(R.id.weather_tv_day_three);
         mIvFutureImageThree = (ImageView) view.findViewById(R.id.weather_iv_third);
-        mTvFutureWeatherThree = (TextView) view.findViewById(R.id.weather_tv_futureWeatherThree);
-        mTvFutureTempThree = (TextView) view.findViewById(R.id.weather_tv_futureTempThree);
-        mTvFutureWindThree = (TextView) view.findViewById(R.id.weather_tv_futureWindThree);
-        mTvFutureDayForth = (TextView) view.findViewById(R.id.weather_tv_dayForth);
+        mTvFutureWeatherThree = (TextView) view.findViewById(R.id.weather_tv_future_weather_three);
+        mTvFutureTempThree = (TextView) view.findViewById(R.id.weather_tv_future_temp_three);
+        mTvFutureWindThree = (TextView) view.findViewById(R.id.weather_tv_future_wind_three);
+        mTvFutureDayForth = (TextView) view.findViewById(R.id.weather_tv_day_forth);
         mIvFutureImageForth = (ImageView) view.findViewById(R.id.weather_iv_forth);
-        mTvFutureWeatherForth = (TextView) view.findViewById(R.id.weather_tv_futureWeatherForth);
-        mTvFutureTempForth = (TextView) view.findViewById(R.id.weather_tv_futureTempForth);
-        mTvFutureWindForth = (TextView) view.findViewById(R.id.weather_tv_futureWindForth);
-        mTvFutureDayFifth = (TextView) view.findViewById(R.id.weather_tv_dayFifth);
+        mTvFutureWeatherForth = (TextView) view.findViewById(R.id.weather_tv_future_weather_forth);
+        mTvFutureTempForth = (TextView) view.findViewById(R.id.weather_tv_future_temp_forth);
+        mTvFutureWindForth = (TextView) view.findViewById(R.id.weather_tv_future_wind_forth);
+        mTvFutureDayFifth = (TextView) view.findViewById(R.id.weather_tv_day_fifth);
         mIvFutureImageFifth = (ImageView) view.findViewById(R.id.weather_iv_fifth);
-        mTvFutureWeatherFifth = (TextView) view.findViewById(R.id.weather_tv_futureWeatherFifth);
-        mTvFutureTempFifth = (TextView) view.findViewById(R.id.weather_tv_futureTempFifth);
-        mTvFutureWindFifth = (TextView) view.findViewById(R.id.weather_tv_futureWindFifth);
-        mTvFutureDaySix = (TextView) view.findViewById(R.id.weather_tv_daySix);
+        mTvFutureWeatherFifth = (TextView) view.findViewById(R.id.weather_tv_future_weather_fifth);
+        mTvFutureTempFifth = (TextView) view.findViewById(R.id.weather_tv_future_temp_fifth);
+        mTvFutureWindFifth = (TextView) view.findViewById(R.id.weather_tv_future_wind_fifth);
+        mTvFutureDaySix = (TextView) view.findViewById(R.id.weather_tv_day_six);
         mIvFutureImageSix = (ImageView) view.findViewById(R.id.weather_iv_six);
-        mTvFutureWeatherSix = (TextView) view.findViewById(R.id.weather_tv_futureWeatherSix);
-        mTvFutureTempSix = (TextView) view.findViewById(R.id.weather_tv_futureTempSix);
-        mTvFutureWindSix = (TextView) view.findViewById(R.id.weather_tv_futureWindSix);
+        mTvFutureWeatherSix = (TextView) view.findViewById(R.id.weather_tv_future_weather_six);
+        mTvFutureTempSix = (TextView) view.findViewById(R.id.weather_tv_future_temp_six);
+        mTvFutureWindSix = (TextView) view.findViewById(R.id.weather_tv_future_wind_six);
 
         mWeatherDB = WeatherDB.getInstance(getActivity());
     }
